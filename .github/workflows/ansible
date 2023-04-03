@@ -1,0 +1,12 @@
+on:
+  push:
+    branches:
+      - master
+jobs:
+  run-playbooks:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Ansible Playbook
+      run: ansible-playbook your_playbook.yaml
+#https://networkbrouhaha.com/2020/05/ansible-with-github-actions/
