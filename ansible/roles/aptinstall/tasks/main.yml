@@ -1,0 +1,10 @@
+---
+# tasks file for aptinstall
+- name: Update apt cache and install package
+  apt:
+    update_cache: yes
+    name: 
+      - git
+      - curl
+      - sudo
+    state: present

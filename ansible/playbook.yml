@@ -1,0 +1,14 @@
+- name: Configure systems
+  hosts: "*"
+  #pre_tasks:
+  #  - name: "install python"
+  #    raw: apt-get -y install python
+
+- name: Call Roles
+  hosts: "*"
+  vars_files:
+  - vars/vault.yml
+
+  roles:
+    - aptinstall
+   #- ntp-config
