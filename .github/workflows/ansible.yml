@@ -6,6 +6,12 @@ jobs:
   run-playbooks:
     runs-on: ubuntu-22.04
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # Fetch depth set to 0 means that all commits are to be mirrored
+    - name: Decrypt Pem
+      run: ls
     - name: Decrypt Pem
       run: gpg --quiet --batch --yes --decrypt --passphrase='$PASSPHRASE' --output ./EcommercekeyVPS ./EcommercekeyVPS.gpg
       env: 
