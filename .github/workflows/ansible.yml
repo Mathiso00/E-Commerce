@@ -8,6 +8,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run Ansible Playbook
-      run: ansible-playbook ./ansible/playbook.yml -i ./ansible/hosts
+      run: ansible-playbook ./ansible/playbook.yml -i ./ansible/hosts --private-key=${{secrets.EPITECH_MIRROR_SSH_KEY}}
 #https://networkbrouhaha.com/2020/05/ansible-with-github-actions/
 
