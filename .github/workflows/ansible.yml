@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
   run-playbooks:
     runs-on: self-hosted
