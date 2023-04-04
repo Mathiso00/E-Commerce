@@ -13,3 +13,8 @@ app/composer.lock
 .gitignore
 .idea
 .github
+
+
+###> Docker MariaDB ###
+.env.maria
+###< Docker MariaDB ###
