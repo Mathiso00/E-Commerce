@@ -4,7 +4,7 @@ on:
       - main
 jobs:
   run-playbooks:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - name: Run Ansible Playbook
