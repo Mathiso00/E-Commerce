@@ -1,4 +1,3 @@
-
 ###> symfony/framework-bundle ###
 app/.env.local
 app/.env
@@ -18,3 +17,7 @@ app/composer.lock
 ###> Docker MariaDB ###
 .env.maria
 ###< Docker MariaDB ###
+
+###> Ansible ###
+EcommercekeyVPS
+###< Ansible ###
