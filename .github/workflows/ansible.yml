@@ -6,16 +6,18 @@ jobs:
   run-playbooks:
     runs-on: ubuntu-22.04
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # Fetch depth set to 0 means that all commits are to be mirrored
     - name: Decrypt Pem
-      run: ls -al ../
+      run: ls
     - name: Decrypt Pem
-      run: gpg --quiet --batch --yes --decrypt --passphrase="$PASSPHRASE" --output ./key/EcommercekeyVPS ./key/EcommercekeyVPS.gpg
+      run: gpg --quiet --batch --yes --decrypt --passphrase='$PASSPHRASE' --output ./EcommercekeyVPS ./EcommercekeyVPS.gpg
       env: 
         PASSPHRASE: ${{ secrets.PASSPHRASE }}
-    - name: Change right of key file
-      run: chmod 600 EcommercekeyVPS
     - uses: actions/checkout@v2
     - name: Run Ansible Playbook
-      run: ansible-playbook ./playbook.yml -i ./hosts
+      run: ansible-playbook ./ansible/playbook.yml -i ./ansible/hosts
 #https://networkbrouhaha.com/2020/05/ansible-with-github-actions/
 
