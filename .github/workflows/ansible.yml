@@ -13,7 +13,7 @@ jobs:
     - name: Decrypt Pem
       run: ls
     - name: Decrypt Pem
-      run: gpg --quiet --batch --yes --decrypt --passphrase='$PASSPHRASE' --output ./EcommercekeyVPS ./EcommercekeyVPS.gpg
+      run: gpg --quiet --batch --yes --decrypt --passphrase="$PASSPHRASE" --output ./key/EcommercekeyVPS ./key/EcommercekeyVPS.gpg
       env: 
         PASSPHRASE: ${{ secrets.PASSPHRASE }}
     - uses: actions/checkout@v2
