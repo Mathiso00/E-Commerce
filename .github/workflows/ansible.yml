@@ -6,17 +6,8 @@ jobs:
   run-playbooks:
     runs-on: self-hosted
     steps:
-    - uses: dawidd6/action-ansible-playbook@v2.6.1
+    - uses: actions/checkout@v2
     - name: Run Ansible Playbook
-      with:
-        # Required, playbook filepath
-        playbook: playbook.yml
-        # Optional, directory where playbooks live
-        directory: ./ansible
-        # Optional, SSH private key
-        key: ${{secrets.EPITECH_MIRROR_SSH_KEY}}
-        # Optional, additional flags to pass to ansible-playbook
-        options: |
-          --inventory .hosts
+      run: ansible-playbook ./ansible/playbook.yml -i ./ansible/hosts
 #https://networkbrouhaha.com/2020/05/ansible-with-github-actions/
 
