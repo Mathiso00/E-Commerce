@@ -1,0 +1,17 @@
+on:
+  push:
+    branches:
+      - feature/setup_ansible
+jobs:
+  run-playbooks:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Decrypt Pem
+      run: gpg --quiet --batch --yes --decrypt --passphrase='$PASSPHRASE' --output ./EcommercekeyVPS ./EcommercekeyVPS.gpg
+      env: 
+        PASSPHRASE: ${{ secrets.PASSPHRASE }}
+    - uses: actions/checkout@v2
+    - name: Run Ansible Playbook
+      run: ansible-playbook ./ansible/playbook.yml -i ./ansible/hosts
+#https://networkbrouhaha.com/2020/05/ansible-with-github-actions/
+
