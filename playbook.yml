@@ -13,4 +13,7 @@
   
   roles:
     - role: ansible/roles/aptinstall
+    #- role: ansible/roles/apacheinstall
+    - role: ansible/roles/phpinstall
+    #- role: ansible/roles/mariadbinstall
 

@@ -1,0 +1,9 @@
+---
+# tasks file for mariadbinstall
+- name: install MariaDB
+  apt:
+      name: 
+        - mariadb-server
+
+- name: restart apache
+  raw: service apache2 restart
