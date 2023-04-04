@@ -10,3 +10,6 @@ app/var/
 app/vendor/
 app/composer.lock
 ###< symfony/framework-bundle ###
+.gitignore
+.idea
+.github
