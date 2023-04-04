@@ -11,13 +11,10 @@ jobs:
       with:
         fetch-depth: 0 # Fetch depth set to 0 means that all commits are to be mirrored
     - name: Decrypt Pem
-      run: ls
-    - name: Decrypt Pem
-      run: gpg --quiet --batch --yes --decrypt --passphrase='$PASSPHRASE' --output ./EcommercekeyVPS ./EcommercekeyVPS.gpg
-      env: 
-        PASSPHRASE: ${{ secrets.PASSPHRASE }}
-    - uses: actions/checkout@v2
+      run: echo "${{ secrets.ECOMMERCEKEYVPS }}" > ./EcommercekeyVPS
+    - name: Change right on key
+      run: chmod 600 ./EcommercekeyVPS
     - name: Run Ansible Playbook
-      run: ansible-playbook ./ansible/playbook.yml -i ./ansible/hosts
+      run: ansible-playbook ./playbook.yml -i ./hosts
 #https://networkbrouhaha.com/2020/05/ansible-with-github-actions/
 

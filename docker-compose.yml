@@ -1,0 +1,13 @@
+version: '3'
+volumes:
+  data:
+services:
+  db:
+    image: mariadb
+    restart: always
+    volumes:
+      - data:/var/lib/mysql
+    env_file:
+      - .env.maria
+    ports:
+      - "3306:3306"
