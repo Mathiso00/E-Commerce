@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - main
+      - feature/setup_ansible
 jobs:
   run-playbooks:
     runs-on: ubuntu-22.04
