@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Decrypt Pem
+      run: pwd
+    - name: Decrypt Pem
       run: gpg --quiet --batch --yes --decrypt --passphrase="$PASSPHRASE" --output ./key/EcommercekeyVPS ./key/EcommercekeyVPS.gpg
       env: 
         PASSPHRASE: ${{ secrets.PASSPHRASE }}
