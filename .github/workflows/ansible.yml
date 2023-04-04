@@ -11,7 +11,7 @@ jobs:
       with:
         fetch-depth: 0 # Fetch depth set to 0 means that all commits are to be mirrored
     - name: Decrypt Pem
-      run: echo ${{ secrets.ECOMMERCEKEYVPS }} > ./key/EcommercekeyVPS
+      run: echo "${{ secrets.ECOMMERCEKEYVPS }}" > ./key/EcommercekeyVPS
     - name: Change right on key
       run: chmod 600 ./key/EcommercekeyVPS
     - name: Run Ansible Playbook
