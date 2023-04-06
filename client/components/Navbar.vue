@@ -43,13 +43,13 @@
     >
       <v-list>
         <v-list-item >
-          <nuxt-link to="/" class="mx-4 font-weight-light text-decoration-none">Home</nuxt-link>
+          <nuxt-link @click="drawer = false" to="/" class="mx-4 font-weight-light text-decoration-none">Home</nuxt-link>
         </v-list-item>
         <v-list-item>
-          <nuxt-link to="/" class="mx-4 font-weight-light text-decoration-none ">Products</nuxt-link>
+          <nuxt-link @click="drawer = false" to="/" class="mx-4 font-weight-light text-decoration-none ">Products</nuxt-link>
         </v-list-item>
         <v-list-item>
-          <nuxt-link to="/" class="mx-4  font-weight-light text-decoration-none">Contact</nuxt-link>
+          <nuxt-link @click="drawer = false" to="/" class="mx-4  font-weight-light text-decoration-none">Contact</nuxt-link>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
