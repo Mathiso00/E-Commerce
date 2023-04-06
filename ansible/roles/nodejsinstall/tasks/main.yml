@@ -1,0 +1,10 @@
+---
+# tasks file for nodejsinstall
+- name: Install the nodejs
+  apt:
+    name: nodejs
+    state: present
+
+# deplace project
+
+# run project
