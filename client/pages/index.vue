@@ -1,12 +1,12 @@
 <template>
-  <v-container>
-    <v-col>
-      <h1 class="text-red text-center"> Welcome to our merchant site </h1>
-    </v-col>
+  <div>
+    <div>
+      <h1> Welcome to our merchant site </h1>
+    </div>
 
-  </v-container>
+  </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
 
 </script>
