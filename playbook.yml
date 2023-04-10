@@ -16,4 +16,5 @@
     - role: ansible/roles/apacheinstall
     - role: ansible/roles/phpinstall
     - role: ansible/roles/mariadbinstall
+    - role: ansible/roles/composersymfonyinstall
     - role: ansible/roles/nodejsinstall

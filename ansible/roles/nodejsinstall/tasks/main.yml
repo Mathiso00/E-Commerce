@@ -1,10 +1,27 @@
 ---
 # tasks file for nodejsinstall
-- name: Install the nodejs
+- name: Install the nodejs and npm
   apt:
-    name: nodejs
+    name: 
+      - nodejs
+      - npm
     state: present
 
-# deplace project
+# move project    change to avoid node module
+- name: Copy nuxt project
+  copy: 
+    src: ../../../../client/
+    dest: /var/www/client/
 
-# run project
+- name: Install dependencies
+  shell: npm i
+  args:
+    chdir: /var/www/client
+
+# run
+- name: Start client
+  shell: npm run dev
+  args:
+    chdir: /var/www/client
+  ignore_errors: yes
+  when: npm_finished.changed

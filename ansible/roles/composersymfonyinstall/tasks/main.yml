@@ -1,0 +1,41 @@
+---
+# tasks file for composersymfonyinstall
+
+# Install Composer
+- name: Install Composer
+  command: php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+
+- name: Install Composer
+  command: php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611085589f1f3ddf8b3c52d662cd01d4ba75c0ee0459970c2200a51f492d557530c71c15d8dba01eae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+
+- name: Install Composer
+  command: php composer-setup.php
+
+- name: Install Composer
+  command: php -r "unlink('composer-setup.php');"
+
+- name: Move Composer.phar
+  command: mv composer.phar /usr/local/bin/composer
+
+- name: Get setup.deb.sh for symfony
+  shell: curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash
+
+# Install symfony
+- name: install symfony
+  apt:
+    update_cache: yes
+    name: 
+      - symfony-cli
+
+- name: Copy symfony project
+  copy: 
+    src: ../../../../app/
+    dest: /var/app/
+
+# Install dependencies
+- name: Install dependencies
+  composer:
+    command: install
+    working_dir: /var/app
+
+# run
