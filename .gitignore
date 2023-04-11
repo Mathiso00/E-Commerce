@@ -12,6 +12,7 @@ app/composer.lock
 .gitignore
 .idea
 .github
+.DS_Store
 
 
 ###> Docker MariaDB ###
