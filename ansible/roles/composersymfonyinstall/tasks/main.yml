@@ -15,27 +15,55 @@
   command: php -r "unlink('composer-setup.php');"
 
 - name: Move Composer.phar
-  command: mv composer.phar /usr/local/bin/composer
+  command: sudo mv composer.phar /usr/local/bin/composer
 
 - name: Get setup.deb.sh for symfony
   shell: curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash
 
 # Install symfony
 - name: install symfony
+  become: true
   apt:
     update_cache: yes
     name: 
       - symfony-cli
 
+# - name: Change permissions for app
+#   file:
+#     path: "/var/app"
+#     owner: "server"
+#     group: "server"
+#     mode: 0770
+#     recurse: yes
+
 - name: Copy symfony project
   copy: 
     src: ../../../../app/
     dest: /var/app/
+    owner: "server"
+    group: "server"
 
-# Install dependencies
+- name: Change owner (Otherwise can't read composer.lock)
+  command: sudo chown -R $USER /var/app
+
+# need .env file
+
+# Install dependencies need to create user and change user https://github.com/kirelos/symfony-ansible/blob/master/roles/symfony/tasks/main.yml
 - name: Install dependencies
   composer:
     command: install
     working_dir: /var/app
+  # environment:
+  #   COMPOSER_NO_INTERACTION: "1"   
+  #   COMPOSER_ALLOW_SUPERUSER: "1"
+
+#Doctrine migrate
 
 # run
+
+
+    # - name: Execute migrations
+    #   command: "{{ symfony }} doctrine:migrations:migrate --no-interaction"
+    #   become: yes
+    #   become_user: "{{ sym_user }}"
+    #   ignore_errors: yes

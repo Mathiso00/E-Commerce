@@ -15,12 +15,13 @@
 
 - name: Install dependencies
   shell: npm i
+  register: npm_finished
   args:
     chdir: /var/www/client
 
-# run
+# run   test this but not sure https://www.closingtags.com/deploying-node-js-apps-with-ansible/
 - name: Start client
-  shell: npm run dev
+  shell: npm run start
   args:
     chdir: /var/www/client
   ignore_errors: yes
