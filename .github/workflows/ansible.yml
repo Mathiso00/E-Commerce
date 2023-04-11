@@ -1,0 +1,20 @@
+on:
+  push:
+    branches:
+      - feature/setup_ansible
+jobs:
+  run-playbooks:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # Fetch depth set to 0 means that all commits are to be mirrored
+    - name: Decrypt Pem
+      run: echo "${{ secrets.ECOMMERCEKEYVPS }}" > ./EcommercekeyVPS
+    - name: Change right on key
+      run: chmod 600 ./EcommercekeyVPS
+    - name: Run Ansible Playbook
+      run: ansible-playbook ./playbook.yml -i ./hosts
+#https://networkbrouhaha.com/2020/05/ansible-with-github-actions/
+
