@@ -21,4 +21,5 @@ app/composer.lock
 
 ###> Ansible ###
 EcommercekeyVPS
+vault_pass.txt
 ###< Ansible ###

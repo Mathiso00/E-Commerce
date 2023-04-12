@@ -1,8 +1,9 @@
 ---
 # tasks file for phpinstall
-- name: install php
+- name: Install php
   apt:
       name: 
+        - php8.2
         - php8.2-mysql
         - php8.2-fpm
         - php8.2-mbstring
@@ -10,8 +11,3 @@
         - php8.2-xml
         - php8.2-zip
       state: present
-- name: Change timezone
-  replace:
-    path: /etc/php/8.2/apache2/php.ini
-    regexp: 'date.timezone ='
-    replace: "date.timezone = Europe/Paris"

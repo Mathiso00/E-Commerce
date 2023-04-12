@@ -1,17 +1,23 @@
 ---
 # tasks file for nodejsinstall
-- name: Install the nodejs and npm
+- name: get nodejs 16
+  shell: curl -sL https://deb.nodesource.com/setup_16.x | sudo bash -
+
+- name: Install the nodejs
+  become: true
   apt:
     name: 
       - nodejs
-      - npm
     state: present
 
 # move project    change to avoid node module
 - name: Copy nuxt project
+  become: true
   copy: 
     src: ../../../../client/
     dest: /var/www/client/
+    owner: "server"
+    group: "server"
 
 - name: Install dependencies
   shell: npm i
@@ -19,10 +25,10 @@
   args:
     chdir: /var/www/client
 
-# run   test this but not sure https://www.closingtags.com/deploying-node-js-apps-with-ansible/
-- name: Start client
-  shell: npm run start
+- name: install pm2
+  shell: sudo npm install pm2 -g
+
+- name: run with pm2
+  shell: pm2 --name clientNuxt start npm -- run dev
   args:
     chdir: /var/www/client
-  ignore_errors: yes
-  when: npm_finished.changed
