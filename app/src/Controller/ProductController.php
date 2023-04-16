@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Cart;
+use App\Entity\CartItem;
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -91,9 +93,6 @@ class ProductController extends AbstractController
         return new Response('Product deleted successfully', Response::HTTP_NO_CONTENT);
     }
 
-    //     /**
-    // * @Route("/cart/add/{productId}", name="cart_add", methods={"POST"})
-    // */
     // public function addToCart(Request $request, EntityManagerInterface $entityManager, int $productId): JsonResponse
     // {
     //     // Vérifier si le produit existe

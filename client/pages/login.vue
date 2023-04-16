@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <h1>Sign in</h1>
+  <div class="mt-16">
     <LoginForm />
   </div>
 </template>
