@@ -30,6 +30,7 @@ class CartController extends AbstractController
         }
 
         $user = $this->getUser();
+        dd($user);
         
         if(!$user || !$this->isGranted('IS_AUTHENTICATED_FULLY')){
             return new JsonResponse(['status' => 401, 'message' => 'You must be authenticated to add items to the cart'], Response::HTTP_UNAUTHORIZED);
