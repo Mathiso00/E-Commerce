@@ -8,6 +8,8 @@ app/public/bundles/
 app/var/
 app/vendor/
 app/composer.lock
+.env
+jwt
 ###< symfony/framework-bundle ###
 .gitignore
 .idea
@@ -23,3 +25,5 @@ app/composer.lock
 EcommercekeyVPS
 vault_pass.txt
 ###< Ansible ###
+
+E-Commerce.tar.gz

@@ -36,6 +36,22 @@
     owner: "server"
     group: "server"
 
+- name: Copy jwt directory
+  become: true
+  copy: 
+    src: ../../../../jwt
+    dest: /var/app/config/
+    owner: "server"
+    group: "server"
+
+- name: Copy .env
+  become: true
+  copy: 
+    src: ../../../../.env
+    dest: /var/app/.env
+    owner: "server"
+    group: "server"
+
 - name: Change owner (Otherwise can't read composer.lock)
   command: sudo chown -R $USER /var/app
 
@@ -45,15 +61,15 @@
   args:
     chdir: /var/app
 
-- name: Creates directory migrations
+- name: Create migrations directory
   file:
     path: /var/app/migrations
     state: directory
 
 #make migration
 
-- name: Create migrations
-  command: php bin/console make:migration
+- name: Create migration
+  command: php bin/console make:migration --no-interaction
   args:
     chdir: /var/app
 
