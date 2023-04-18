@@ -2,44 +2,40 @@
 
 namespace App\Controller;
 
+use App\Service\UserService;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 #[Route('/api/users')]
 class UserController extends AbstractController
 {
     private $userRepository;
-    private $jwtManager;
-    private $tokenStorageInterface;
+    private $userService;
 
-    public function __construct(UserRepository $userRepository, TokenStorageInterface $tokenStorageInterface, JWTTokenManagerInterface $jwtManager)
+    public function __construct(UserRepository $userRepository, UserService $userService)
     {
         $this->userRepository = $userRepository;
-        $this->jwtManager = $jwtManager;
-        $this->tokenStorageInterface = $tokenStorageInterface;
+        $this->userService = $userService;
     }
     
     #[Route('', name: 'app_user_get', methods: ['GET'])]
     public function index(SerializerInterface $serializer): JsonResponse
     {
-        $decodedJwtToken = $this->jwtManager->decode($this->tokenStorageInterface->getToken());
-        if($decodedJwtToken && $decodedJwtToken["email"]) {
-            $user = $this->userRepository->findOneBy(array('email' => $decodedJwtToken["email"]));
+        $email = $this->userService->getUserEmail();
+        if($email) {
+            $user = $this->userRepository->findOneBy(array('email' => $email));
             $data = $serializer->serialize($user, 'json', [
                 'groups' => ['api']
             ]);
             return new JsonResponse($data, 200, [], true);
         }
-        
     }
     
-    #[Route('', name: 'app_user_edit', methods: ['PUT'])]
+    #[Route('', name: 'app_user_edit', methods: ['PATCH'])]
     public function edit(Request $request): JsonResponse
     {
         // $userRepository->save($user, true);
