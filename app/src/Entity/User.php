@@ -6,32 +6,51 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    /**
+     * @Groups("api")
+     */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    /**
+     * @Groups("api")
+     */
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
-
+    
     #[ORM\Column]
     private array $roles = [];
-
+    
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
     private ?string $password = null;
-
+    
+    /**
+     * @Groups("api")
+     */
     #[ORM\Column(length: 100)]
     private ?string $firstname = null;
-
+    
+    /**
+     * @Groups("api")
+     */
     #[ORM\Column(length: 100)]
     private ?string $lastname = null;
+    
+    /**
+     * @Groups("api")
+     */
+    #[ORM\Column(length: 100)]
+    private ?string $login = null;
 
     public function getId(): ?int
     {
@@ -132,6 +151,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastname(string $lastname): self
     {
         $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    public function getLogin(): ?string
+    {
+        return $this->login;
+    }
+
+    public function setLogin(string $login): self
+    {
+        $this->login = $login;
 
         return $this;
     }

@@ -49,7 +49,8 @@ class AuthController extends AbstractController
             $user->setEmail($email)
             ->setPassword($hashedPassword)
             ->setFirstname("Firstname")
-            ->setLastname("Lastname");
+            ->setLastname("Lastname")
+            ->setLogin('Login');
             
             $this->manager->persist($user);
             $this->manager->flush();
