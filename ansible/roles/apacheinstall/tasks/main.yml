@@ -1,0 +1,23 @@
+---
+# tasks file for apacheinstall
+- name: Install apache2
+  apt:
+      name: 
+        - apache2
+      state: present
+
+- name: Change configuration
+  template:
+    src: templates/000-default.conf
+    dest: /etc/apache2/sites-available/000-default.conf
+
+- name: Create cerbot certificate
+  shell: sudo certbot --apache -d www.ultimategaminggear.tech -m mathis.onillon@epitech.eu
+
+# - name: Setup cron to renew certificates
+#   shell: 
+
+- name: Restart apache
+  shell: service apache2 restart
+
+

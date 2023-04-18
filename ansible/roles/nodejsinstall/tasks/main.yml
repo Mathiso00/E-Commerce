@@ -25,10 +25,11 @@
   args:
     chdir: /var/www/client
 
-- name: install pm2
-  shell: sudo npm install pm2 -g
-
-- name: run with pm2
-  shell: pm2 --name clientNuxt start npm -- run dev
+- name: build nuxt project
+  shell: npm run generate
   args:
     chdir: /var/www/client
+
+# - name: restart apache
+#   become: true
+#   shell: service apache2 restart
