@@ -102,10 +102,8 @@ const validate = () => {
 
 async function signUser() {
   loading.value = true;
-  console.log('hello');
   try {
     if(validate()){
-      console.log('yes guys!')
       console.log(firstname.value)
       let response = await signUp(firstname.value, lastname.value, email.value, password.value);
       if(response){
