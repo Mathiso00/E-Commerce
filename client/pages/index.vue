@@ -18,7 +18,6 @@
                 <v-img height="125" cover class="bg-grey-lighten-2 " :src="product.img" />
                 <v-card-title class="text-h6">{{ product.name }}</v-card-title>
                 <v-card-subtitle class="text-body-1 mb-3">{{ product.description }}</v-card-subtitle>
-                <Rating />
 <!--                <v-card-text class="text-body-2">{{ product.price }} €</v-card-text>-->
               </v-card>
             </v-col>
@@ -39,7 +38,6 @@ import Pc from "../assets/new-pc.webp";
 import Souris2 from  '../assets/souris2.webp'
 import Boitier from '../assets/Boitier-PC-7.jpg'
 import {useDisplay} from "vuetify";
-import Rating from "~/components/Rating.vue";
 
 const { smAndUp, mdAndUp, lgAndUp } = useDisplay();
 

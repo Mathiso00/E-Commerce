@@ -5,7 +5,9 @@ export default defineNuxtConfig({
     ssr: false,
     runtimeConfig: {
         public: {
-
+            public: {
+                apiBaseUrl: '/',
+            }
         }
     },
     css: [
@@ -22,6 +24,26 @@ export default defineNuxtConfig({
     plugins: [
         { src: '~/plugins/vuetify' }
     ],
+    auth: {
+        globalMiddleware: true,
+        strategies: {
+            local: {
+                token: {
+                    property: 'token',
+                    global: true,
+                },
+                endpoints: {
+                    login: {
+                        url: process.env.NUXT_PUBLIC_API_BASE_URL + '/login',
+                        method: 'post',
+                    }
+                },
+                user: {
+                    property: false
+                }
+            }
+        }
+    },
     vuetify: {
         defaultAssets: {
             icons: 'mdi',
