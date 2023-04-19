@@ -6,11 +6,11 @@ use App\Entity\User;
 use App\Service\UserService;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api/users')]
 class UserController extends AbstractController
@@ -36,7 +36,7 @@ class UserController extends AbstractController
             'groups' => ['api']
         ]);
         if(empty($data)) {
-            return new JsonResponse("Array is empty but you're auth... wht's happening ?!", 500, [], true);
+            return new JsonResponse("Array is empty but you're auth... wht's happening ?!", 500, [], false);
         }
 
         return new JsonResponse($data, 200, [], true);
