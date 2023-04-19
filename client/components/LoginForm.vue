@@ -80,7 +80,6 @@ async function loginUser(){
     if(validateForm()){
       let response = await $auth.loginWith('local', {body: { email: email.value, password: password.value }});
       success.value = 'You are login successfully.';
-      console.log(response);
       navigateTo('/');
     }
   }catch (e) {

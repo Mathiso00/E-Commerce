@@ -11,3 +11,7 @@ export async function signUp(firstname: string, lastname: string, email: string,
         console.log(e);
     }
 }
+
+export async function ShowUser(){
+
+}
