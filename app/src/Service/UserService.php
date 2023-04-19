@@ -17,7 +17,8 @@ class UserService
         $this->jwtManager = $jwtManager;
     }
 
-    public function getUserEmail()
+    // Generate by default 401 if no token !
+    public function getUserEmail(): String
     {
         $token = $this->tokenStorageInterface->getToken();
         $email = null;
@@ -29,5 +30,13 @@ class UserService
         }
 
         return $email;
+    }
+
+    public function Sanitize($var): string
+    {
+        if(is_string($var)) {
+            return filter_var($var, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        }
+        throw new \Exception("Invalid data type. Expected a string.", 400);
     }
 }
