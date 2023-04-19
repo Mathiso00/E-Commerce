@@ -15,11 +15,10 @@ class Cart
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'carts')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\OneToOne(inversedBy: 'cart', cascade: ['persist', 'remove'])]
     private ?User $user = null;
 
-    #[ORM\OneToMany(mappedBy: 'cart', targetEntity: CartItem::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'cart', targetEntity: CartItem::class)]
     private Collection $cartItems;
 
     public function __construct()
@@ -72,5 +71,25 @@ class Cart
         }
 
         return $this;
+    }
+
+    public function getCartItemByProductId(int $productId): ?CartItem
+    {
+        foreach ($this->cartItems as $cartItem) {
+            if ($cartItem->getProduct()->getId() === $productId) {
+                return $cartItem;
+            }
+        }
+
+        return null;
+    }
+
+    public function calculateTotalPrice(): float
+    {
+        $totalPrice = 0;
+        foreach ($this->cartItems as $cartItem) {
+            $totalPrice += $cartItem->getProduct()->getPrice() * $cartItem->getQuantity();
+        }
+        return $totalPrice;
     }
 }

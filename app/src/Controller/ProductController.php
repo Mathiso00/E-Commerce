@@ -83,7 +83,7 @@ class ProductController extends AbstractController
         $product = $entityManager->getRepository(Product::class)->find($productId);
 
         if (!$product) {
-            return new JsonResponse(['status' => 404, 'message' => 'Produit not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['status' => 404, 'message' => 'Product not found'], Response::HTTP_NOT_FOUND);
         }
 
         $entityManager->remove($product);
@@ -92,33 +92,5 @@ class ProductController extends AbstractController
         // Retourner une réponse HTTP 204 No Content pour indiquer que la suppression a réussi
         return new Response('Product deleted successfully', Response::HTTP_NO_CONTENT);
     }
-
-    // public function addToCart(Request $request, EntityManagerInterface $entityManager, int $productId): JsonResponse
-    // {
-    //     // Vérifier si le produit existe
-    //     $product = $entityManager->getRepository(Product::class)->find($productId);
-    //     if (!$product) {
-    //         return new JsonResponse(['status' => 404, 'message' => 'Product not found'], Response::HTTP_NOT_FOUND);
-    //     }
-
-    //     // Récupérer le panier de l'utilisateur (ou le créer s'il n'existe pas encore)
-    //     $user = $this->getUser();
-    //     $cart = $entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
-    //     if (!$cart) {
-    //         $cart = new Cart();
-    //         $cart->setUser($user);
-    //         $entityManager->persist($cart);
-    //     }
-
-    //     // Ajouter le produit au panier
-    //     $cartItem = new CartItem();
-    //     $cartItem->setProduct($product);
-    //     $cartItem->setQuantity(1); // Mettez la quantité souhaitée ici
-    //     $cartItem->setCart($cart);
-    //     $entityManager->persist($cartItem);
-    //     $entityManager->flush();
-
-    //     return new JsonResponse(['status' => 200, 'message' => 'Product added to cart successfully']);
-    // }
 
 }

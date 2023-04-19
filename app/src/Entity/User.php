@@ -35,13 +35,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100)]
     private ?string $lastname = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Cart::class, orphanRemoval: true)]
-    private Collection $carts;
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Cart $cart = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Order::class, orphanRemoval: true)]
+    private Collection $orders;
 
     public function __construct()
     {
-        $this->carts = new ArrayCollection();
+        $this->orders = new ArrayCollection();
     }
+
 
     public function getId(): ?int
     {
@@ -146,33 +150,56 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Cart>
-     */
-    public function getCarts(): Collection
+    public function getCart(): ?Cart
     {
-        return $this->carts;
+        return $this->cart;
     }
 
-    public function addCart(Cart $cart): self
+    public function setCart(?Cart $cart): self
     {
-        if (!$this->carts->contains($cart)) {
-            $this->carts->add($cart);
+        // unset the owning side of the relation if necessary
+        if ($cart === null && $this->cart !== null) {
+            $this->cart->setUser(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($cart !== null && $cart->getUser() !== $this) {
             $cart->setUser($this);
+        }
+
+        $this->cart = $cart;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): self
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders->add($order);
+            $order->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeCart(Cart $cart): self
+    public function removeOrder(Order $order): self
     {
-        if ($this->carts->removeElement($cart)) {
+        if ($this->orders->removeElement($order)) {
             // set the owning side to null (unless already changed)
-            if ($cart->getUser() === $this) {
-                $cart->setUser(null);
+            if ($order->getUser() === $this) {
+                $order->setUser(null);
             }
         }
 
         return $this;
     }
+
 }
