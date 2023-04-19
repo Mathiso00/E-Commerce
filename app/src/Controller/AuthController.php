@@ -57,8 +57,6 @@ class AuthController extends AbstractController
             }
             return new JsonResponse("Email already used !", 409, [], false);
         }
-        
-        
-        
+        throw new \Exception("Missing email and password, I can't register you", 400);
     }
 }
