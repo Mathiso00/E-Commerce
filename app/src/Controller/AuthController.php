@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\CorsBundle\Annotation\Cors;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,6 +31,8 @@ class AuthController extends AbstractController
         $data = json_decode($request->getContent(), true);
         
         $email=$data['email'];
+        $firstname=$data['firstname'];
+        $lastname=$data['lastname'];
         $password=$data['password'];
         
         //Check if email already used
@@ -48,8 +51,8 @@ class AuthController extends AbstractController
             
             $user->setEmail($email)
             ->setPassword($hashedPassword)
-            ->setFirstname("Firstname")
-            ->setLastname("Lastname");
+            ->setFirstname($firstname)
+            ->setLastname($lastname);
             
             $this->manager->persist($user);
             $this->manager->flush();

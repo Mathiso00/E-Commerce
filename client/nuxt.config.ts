@@ -5,7 +5,9 @@ export default defineNuxtConfig({
     ssr: false,
     runtimeConfig: {
         public: {
-
+            public: {
+                apiBaseUrl: '/',
+            }
         }
     },
     css: [
