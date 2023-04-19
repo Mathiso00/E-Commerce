@@ -25,38 +25,54 @@ class AuthController extends AbstractController
         $this->userService = $userService;
     }
     
-    // Add password Regex ?
     #[Route('api/register', name: 'user_create', methods: ['POST'])]
     public function userCreate(Request $request, UserPasswordHasherInterface $passwordEncoder): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
         if(isset($data['email']) && isset($data['password'])) {
-            $email=$data['email'];
-            $password=$data['password'];
-
-            //Check if email already used
-            $check_email= $this->userRepository->findOneByEmail($email);
-            
-            if(!$check_email) {
-                $user = new User();
-
-                $user->setPassword($password);
-                $hashedPassword = $passwordEncoder->hashPassword($user, $user->getPassword());
+            try {
+                $email=$data['email'];
+                $password=$data['password'];
+    
+                //Check if email already used
+                $check_email= $this->userRepository->findOneByEmail($email);
                 
-                $user->setEmail($email)
-                ->setPassword($hashedPassword)
-                ->setFirstname(isset($newData['firstname']) && $this->userService->Sanitize($newData['firstname']))
-                ->setLastname(isset($newData['lastname']) && $this->userService->Sanitize($newData['lastname']))
-                ->setLogin(isset($newData['login']) && $this->userService->Sanitize($newData['login']));
-                
-                $this->manager->persist($user);
-                $this->manager->flush();
-                return new JsonResponse("User created !", 201, [], true);
+                if(!$check_email) {
+                    $user = new User();
+    
+                    $this->passwordRequirement($password);
+                    $user->setPassword($password);
+                    $hashedPassword = $passwordEncoder->hashPassword($user, $user->getPassword());
+                    
+                    $user->setEmail($email)
+                    ->setPassword($hashedPassword)
+                    ->setFirstname(isset($newData['firstname']) && $this->userService->Sanitize($newData['firstname']))
+                    ->setLastname(isset($newData['lastname']) && $this->userService->Sanitize($newData['lastname']))
+                    ->setLogin(isset($newData['login']) && $this->userService->Sanitize($newData['login']));
+                    
+                    $this->manager->persist($user);
+                    $this->manager->flush();
+                    return new JsonResponse("User created !", 201, [], true);
+    
+                }
+                return new JsonResponse("Email already used !", 409, [], false);
 
+            } catch (\Exception $e) {
+                $code = $e->getCode() ?: 500;
+                http_response_code($code);
+                echo $e->getMessage();
+                exit;
             }
-            return new JsonResponse("Email already used !", 409, [], false);
         }
-        throw new \Exception("Missing email and password, I can't register you", 400);
+        return new JsonResponse("Missing email and password, I can't register you", 400, [], false);
+    }
+    
+    public function passwordRequirement($password)
+    {
+        $regex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/';
+        if (!preg_match($regex, $password)) {
+            throw new \Exception("The password doesn't meet the requirements", 422);
+        }
     }
 }

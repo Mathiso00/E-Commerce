@@ -30,34 +30,48 @@ class UserController extends AbstractController
     #[Route('', name: 'app_user_get', methods: ['GET'])]
     public function index(SerializerInterface $serializer): JsonResponse
     {
-        $email = $this->userService->getUserEmail();
-        $user = $this->findUserByEmail($email);
-        $data = $serializer->serialize($user, 'json', [
-            'groups' => ['api']
-        ]);
-        if(empty($data)) {
-            return new JsonResponse("Array is empty but you're auth... wht's happening ?!", 500, [], false);
+        try {
+            $email = $this->userService->getUserEmail();
+            $user = $this->findUserByEmail($email);
+            $data = $serializer->serialize($user, 'json', [
+                'groups' => ['api']
+            ]);
+            if(empty($data)) {
+                return new JsonResponse("Array is empty but you're auth... wht's happening ?!", 500, [], false);
+            }
+    
+            return new JsonResponse($data, 200, [], true);
+        } catch (\Exception $e) {
+            $code = $e->getCode() ?: 500;
+            http_response_code($code);
+            echo $e->getMessage();
+            exit;
         }
-
-        return new JsonResponse($data, 200, [], true);
     }
     
 
     #[Route('', name: 'app_user_edit', methods: ['PATCH'])]
     public function edit(Request $request): JsonResponse
     {
-        $newData = json_decode($request->getContent(), true);
-        $email = $this->userService->getUserEmail();
-        $user = $this->findUserByEmail($email);
-
-        $user->setFirstname(isset($newData['firstname']) ? $this->userService->Sanitize($newData['firstname']) : $user->getFirstname());
-        $user->setLastname(isset($newData['lastname']) ? $this->userService->Sanitize($newData['lastname']) : $user->getLastname());
-        $user->setLogin(isset($newData['login']) ? $this->userService->Sanitize($newData['login']) : $user->getLogin());
-        $user->setEmail(isset($newData['email']) ? $this->userService->Sanitize($newData['email']) : $user->getEmail());
-        
-        $this->manager->flush();
-        
-        return new JsonResponse("User updated", 200, [], true);
+        try {
+            $newData = json_decode($request->getContent(), true);
+            $email = $this->userService->getUserEmail();
+            $user = $this->findUserByEmail($email);
+    
+            $user->setFirstname(isset($newData['firstname']) ? $this->userService->Sanitize($newData['firstname']) : $user->getFirstname());
+            $user->setLastname(isset($newData['lastname']) ? $this->userService->Sanitize($newData['lastname']) : $user->getLastname());
+            $user->setLogin(isset($newData['login']) ? $this->userService->Sanitize($newData['login']) : $user->getLogin());
+            $user->setEmail(isset($newData['email']) ? $this->userService->Sanitize($newData['email']) : $user->getEmail());
+            
+            $this->manager->flush();
+            
+            return new JsonResponse("User updated", 200, [], true);
+        } catch (\Exception $e) {
+            $code = $e->getCode() ?: 500;
+            http_response_code($code);
+            echo $e->getMessage();
+            exit;
+        }
     }
 
     public function findUserByEmail(String $email): ?User
