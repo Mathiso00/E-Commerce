@@ -1,0 +1,35 @@
+---
+# tasks file for nodejsinstall
+- name: get nodejs 16
+  shell: curl -sL https://deb.nodesource.com/setup_16.x | sudo bash -
+
+- name: Install the nodejs
+  become: true
+  apt:
+    name: 
+      - nodejs
+    state: present
+
+# move project    change to avoid node module
+- name: Copy nuxt project
+  become: true
+  copy: 
+    src: ../../../../client/
+    dest: /var/www/client/
+    owner: "server"
+    group: "server"
+
+- name: Install dependencies
+  shell: npm i
+  register: npm_finished
+  args:
+    chdir: /var/www/client
+
+- name: build nuxt project
+  shell: npm run generate
+  args:
+    chdir: /var/www/client
+
+# - name: restart apache
+#   become: true
+#   shell: service apache2 restart
