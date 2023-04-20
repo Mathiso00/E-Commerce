@@ -52,8 +52,14 @@
     owner: "server"
     group: "server"
 
-# - name: Change owner (Otherwise can't read composer.lock) # utile ?
-#   command: sudo chown -R $USER /var/app
+- name: Change owner (Otherwise can't read composer.lock) # utile ?
+  command: sudo chown -R $USER /var/app
+
+- name: Update symfony.lock
+  command: composer update
+  args:
+    chdir: /var/app
+
 
 # Install dependencies need to create user and change user https://github.com/kirelos/symfony-ansible/blob/master/roles/symfony/tasks/main.yml
 - name: Install dependencies
