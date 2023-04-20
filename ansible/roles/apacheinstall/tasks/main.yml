@@ -12,10 +12,7 @@
     dest: /etc/apache2/sites-available/000-default.conf
 
 - name: Create cerbot certificate
-  shell: sudo certbot --apache -d www.ultimategaminggear.tech -m mathis.onillon@epitech.eu
-
-# - name: Setup cron to renew certificates
-#   shell: 
+  shell: sudo certbot --apache -d ultimategaminggear.tech -m mathis.onillon@epitech.eu --non-interactive --agree-tos
 
 - name: Restart apache
   shell: service apache2 restart
