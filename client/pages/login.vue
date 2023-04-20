@@ -1,9 +1,9 @@
 <template>
   <div class="mt-16">
-    <LoginForm />
+    <SigninForm />
   </div>
 </template>
 
 <script setup lang="ts">
-import LoginForm from "~/components/LoginForm.vue";
+import SigninForm from "~/components/SigninForm.vue";
 </script>
