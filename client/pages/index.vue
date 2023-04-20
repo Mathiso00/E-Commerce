@@ -4,26 +4,20 @@
     <div >
       <h1 class="text-center font-weight-light my-5">The most popular products</h1>
       <v-container
-          class="fill-height mb-10"
-          fluid
-          style="min-height: 434px"
+          class="mb-10"
       >
         <v-fade-transition mode="out-in">
           <v-row>
             <v-col
                 v-for="product in products"
                 :key="product"
-                cols="12"
-                sm="6"
-                md="4"
-                lg="3"
+                :cols="smAndUp ? mdAndUp ? lgAndUp ? 3 : 4: 6 : 12"
             >
               <v-card class="text-center">
                 <div class="float-right px-2 ml-2 bg-black">{{ product.price }} €</div>
                 <v-img height="125" cover class="bg-grey-lighten-2 " :src="product.img" />
                 <v-card-title class="text-h6">{{ product.name }}</v-card-title>
                 <v-card-subtitle class="text-body-1 mb-3">{{ product.description }}</v-card-subtitle>
-                <Rating />
 <!--                <v-card-text class="text-body-2">{{ product.price }} €</v-card-text>-->
               </v-card>
             </v-col>
@@ -44,21 +38,9 @@ import Pc from "../assets/new-pc.webp";
 import Souris2 from  '../assets/souris2.webp'
 import Boitier from '../assets/Boitier-PC-7.jpg'
 import {useDisplay} from "vuetify";
-import Rating from "~/components/Rating.vue";
 
-const { width, mobile } = useDisplay();
-let newWidth = width.value
-console.log(width.value);
-console.log(mobile.value);
-/*const getCols = () => {
-  if (width.value < 768) {
-    return 12;
-  } else if (width.value < 1024) {
-    return 6;
-  } else {
-    return 4;
-  }
-};*/
+const { smAndUp, mdAndUp, lgAndUp } = useDisplay();
+
 const products: { name: string, description: string, price: number, img: string }[] = [
   {
     name: "IMac Pro",
