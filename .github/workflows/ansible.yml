@@ -13,7 +13,7 @@ jobs:
     - name: Create env
       run: echo "${{ secrets.ENV }}" > ./.env
     - name: Create vault pass
-      run: echo "${{ secrets.VAULT_PASS }}" > ./vaul_pass.txt
+      run: echo "${{ secrets.VAULT_PASS }}" > ./vault_pass.txt
     - name: Create jwt dir
       run: mkdir jwt
     - name: Create jwt private key
