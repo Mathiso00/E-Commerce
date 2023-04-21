@@ -1,0 +1,93 @@
+---
+# tasks file for composersymfonyinstall
+
+# Install Composer
+- name: Install Composer
+  command: php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+
+- name: Install Composer
+  command: php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611085589f1f3ddf8b3c52d662cd01d4ba75c0ee0459970c2200a51f492d557530c71c15d8dba01eae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+
+- name: Install Composer
+  command: php composer-setup.php
+
+- name: Install Composer
+  command: php -r "unlink('composer-setup.php');"
+
+- name: Move Composer.phar
+  command: sudo mv composer.phar /usr/local/bin/composer
+
+- name: Get setup.deb.sh for symfony
+  shell: curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash
+
+# Install symfony
+- name: Install symfony
+  become: true
+  apt:
+    update_cache: yes
+    name: 
+      - symfony-cli
+
+- name: Copy symfony project
+  become: true
+  copy: 
+    src: ../../../../app/
+    dest: /var/app/
+    owner: "server"
+    group: "server"
+
+- name: Copy jwt directory
+  become: true
+  copy: 
+    src: ../../../../jwt
+    dest: /var/app/config/
+    owner: "server"
+    group: "server"
+
+- name: Copy .env
+  become: true
+  copy: 
+    src: ../../../../.env
+    dest: /var/app/.env
+    owner: "server"
+    group: "server"
+
+- name: Change owner (Otherwise can't read composer.lock) # utile ?
+  command: sudo chown -R $USER /var/app
+
+- name: Update symfony.lock
+  command: composer update
+  args:
+    chdir: /var/app
+
+
+# Install dependencies need to create user and change user https://github.com/kirelos/symfony-ansible/blob/master/roles/symfony/tasks/main.yml
+- name: Install dependencies
+  command: composer install
+  args:
+    chdir: /var/app
+
+- name: Create migrations directory
+  file:
+    path: /var/app/migrations
+    state: directory
+
+#make migration
+
+- name: Create migration
+  command: php bin/console make:migration --no-interaction
+  args:
+    chdir: /var/app
+
+#Doctrine migrate
+- name: Execute migrations
+  command: php bin/console doctrine:migrations:migrate --no-interaction
+  args:
+      chdir: /var/app
+# run
+- name: Run symfony server
+  command: symfony server:start -d
+  args:
+    chdir: /var/app
+
+    

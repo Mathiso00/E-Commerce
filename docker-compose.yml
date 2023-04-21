@@ -11,3 +11,4 @@ services:
       - .env.maria
     ports:
       - "3306:3306"
+    #command: bash -c "mysql -h 3306 -u superUser -p'ecommerceUser' -e \"GRANT ALL PRIVILEGES ON *.* TO 'superUser'@'localhost' IDENTIFIED BY 'ecommerceUser'; FLUSH PRIVILEGES;\""

@@ -12,3 +12,5 @@ INSTALL
 
 
 PARLER DES .ENV (.env.maria)
+
+Faut il mettre un vault ou mdp en clair dans le code (pour Ivain)

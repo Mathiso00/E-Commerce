@@ -11,8 +11,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-#[Route('/api/users')]
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Nelmio\CorsBundle\Annotation\Cors;
 class UserController extends AbstractController
 {
     private $manager;
