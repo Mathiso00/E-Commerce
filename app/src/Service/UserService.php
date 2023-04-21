@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Entity\User;
+use App\Repository\UserRepository;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
@@ -38,5 +40,14 @@ class UserService
             return filter_var($var, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         }
         throw new \Exception("Invalid data type. Expected a string.", 400);
+    }
+
+    public function findUserByEmail(String $email, UserRepository $userRepository): ?User
+    {
+        $user = $userRepository->findOneBy(array('email' => $email));
+        if($user === null) {
+            throw new \Exception("You didn't exist. How are you come here...", 401);
+        }
+        return $user;
     }
 }

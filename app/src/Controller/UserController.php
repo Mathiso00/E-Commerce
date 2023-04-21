@@ -32,20 +32,17 @@ class UserController extends AbstractController
     {
         try {
             $email = $this->userService->getUserEmail();
-            $user = $this->findUserByEmail($email);
+            $user = $this->userService->findUserByEmail($email, $this->userRepository);
             $data = $serializer->serialize($user, 'json', [
                 'groups' => ['api']
             ]);
             if(empty($data)) {
-                return new JsonResponse("Array is empty but you're auth... wht's happening ?!", 500, [], false);
+                return new JsonResponse("Array is empty but you're auth... what's happening ?!", 500, [], false);
             }
     
             return new JsonResponse($data, 200, [], true);
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-            http_response_code($code);
-            echo $e->getMessage();
-            exit;
+            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500, [], false);
         }
     }
     
@@ -53,10 +50,13 @@ class UserController extends AbstractController
     #[Route('', name: 'app_user_edit', methods: ['PATCH'])]
     public function edit(Request $request): JsonResponse
     {
+        $newData = json_decode($request->getContent(), true);
+        if($newData === null || sizeof($newData) <= 0) {
+            return new JsonResponse("Empty request Data", 400, [], false);
+        }
         try {
-            $newData = json_decode($request->getContent(), true);
             $email = $this->userService->getUserEmail();
-            $user = $this->findUserByEmail($email);
+            $user = $this->userService->findUserByEmail($email, $this->userRepository);
     
             $user->setFirstname(isset($newData['firstname']) ? $this->userService->Sanitize($newData['firstname']) : $user->getFirstname());
             $user->setLastname(isset($newData['lastname']) ? $this->userService->Sanitize($newData['lastname']) : $user->getLastname());
@@ -67,19 +67,8 @@ class UserController extends AbstractController
             
             return new JsonResponse("User updated", 200, [], true);
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
-            http_response_code($code);
-            echo $e->getMessage();
-            exit;
+            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500, [], false);
         }
     }
 
-    public function findUserByEmail(String $email): ?User
-    {
-        $user = $this->userRepository->findOneBy(array('email' => $email));
-        if($user === null) {
-            throw new \Exception("You didn't exist. How are you come here...", 401);
-        }
-        return $user;
-    }
 }
