@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Service\UserService;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -37,12 +36,12 @@ class UserController extends AbstractController
                 'groups' => ['api']
             ]);
             if(empty($data)) {
-                return new JsonResponse("Array is empty but you're auth... what's happening ?!", 500, [], false);
+                return new JsonResponse("Array is empty but you're auth... what's happening ?!", 500);
             }
     
-            return new JsonResponse($data, 200, [], true);
+            return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
         } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500, [], false);
+            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
         }
     }
     
@@ -52,7 +51,7 @@ class UserController extends AbstractController
     {
         $newData = json_decode($request->getContent(), true);
         if($newData === null || sizeof($newData) <= 0) {
-            return new JsonResponse("Empty request Data", 400, [], false);
+            return new JsonResponse("Empty request Data", JsonResponse::HTTP_BAD_REQUEST);
         }
         try {
             $email = $this->userService->getUserEmail();
@@ -65,9 +64,9 @@ class UserController extends AbstractController
             
             $this->manager->flush();
             
-            return new JsonResponse("User updated", 200, [], true);
+            return new JsonResponse("User updated", JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500, [], false);
+            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 
