@@ -59,13 +59,10 @@ class AuthController extends AbstractController
                 return new JsonResponse("Email already used !", 409, [], false);
 
             } catch (\Exception $e) {
-                $code = $e->getCode() ?: 500;
-                http_response_code($code);
-                echo $e->getMessage();
-                exit;
+                return new JsonResponse($e->getMessage(), $e->getCode() ?: 500, [], false);
             }
         }
-        return new JsonResponse("Missing email and password, I can't register you", 400, [], false);
+        return new JsonResponse("Missing email and/or password, I can't register you", 400, [], false);
     }
     
     public function passwordRequirement($password)
