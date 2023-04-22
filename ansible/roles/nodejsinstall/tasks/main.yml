@@ -22,7 +22,7 @@
 - name: Copy .env
   become: true
   copy: 
-    src: ../../../../.env2
+    src: ../../../../.env_client
     dest: /var/www/client/.env
     owner: "server"
     group: "server"
