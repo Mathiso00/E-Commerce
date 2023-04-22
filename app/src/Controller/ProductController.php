@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -57,22 +56,23 @@ class ProductController extends AbstractController
         return new JsonResponse($data, JsonResponse::HTTP_CREATED, [], true);
     }
     
-    // /**
-    //  * @Route("/{productId}", name="update", methods={"PUT"})
-    //  */
-    // public function update(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, int $productId): JsonResponse
-    // {
-        //     $product = $entityManager->getRepository(Product::class)->find($productId);
+    #[Route('/{productId}', name: "update", methods: ['PUT'])]
+    public function update(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, int $productId): JsonResponse
+    {
+        $product = $entityManager->getRepository(Product::class)->find($productId);
+    
+        if (!$product) {
+            return new JsonResponse("Product not found !", JsonResponse::HTTP_NOT_FOUND);
+        }
+        if(json_decode($request->getContent(), true) === null) {
+            return new JsonResponse("No data send !", JsonResponse::HTTP_BAD_REQUEST);
+        }
         
-        //     if (!$product) {
-            //         return new JsonResponse(['status' => 404, 'message' => 'Product not found'], Response::HTTP_NOT_FOUND);
-            //     }
-            
-            //     $serializer->deserialize($request->getContent(), Product::class, 'json', ['object_to_populate' => $product]);
-            //     $entityManager->flush();
-            
-            //     return new JsonResponse($serializer->serialize($product, 'json'), JsonResponse::HTTP_OK, ['status' => JsonResponse::HTTP_OK, 'message' => 'Product update successfully'], true);
-            // }
+        $serializer->deserialize($request->getContent(), Product::class, 'json', ['object_to_populate' => $product]);
+        $entityManager->flush();
+    
+        return new JsonResponse($serializer->serialize($product, 'json'), JsonResponse::HTTP_OK, [], true);
+    }
             
     #[Route('/{productId}', name: "delete", methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, int $productId): JsonResponse
