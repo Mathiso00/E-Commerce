@@ -19,6 +19,14 @@
     owner: "server"
     group: "server"
 
+- name: Copy .env
+  become: true
+  copy: 
+    src: ../../../../.env2
+    dest: /var/www/client/.env
+    owner: "server"
+    group: "server"
+
 - name: Install dependencies
   shell: npm i
   register: npm_finished
