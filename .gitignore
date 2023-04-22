@@ -27,3 +27,4 @@ vault_pass.txt
 ###< Ansible ###
 
 E-Commerce.tar.gz
+.env_client
