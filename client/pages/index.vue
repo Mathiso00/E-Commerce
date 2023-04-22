@@ -83,4 +83,9 @@ const products: { name: string, description: string, price: number, img: string 
 
 console.log(products)
 
+definePageMeta({
+  title: 'Home',
+  auth: false
+})
+
 </script>

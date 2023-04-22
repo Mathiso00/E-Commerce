@@ -16,7 +16,7 @@
       ></v-btn>
     </div>
 
-    <div class="bg-black text-center w-100 mx-0 py-4 ">
+    <div style="background-color: #1d1d1b" class="text-center text-yellow-lighten-4 w-100 mx-0 py-4 ">
       {{ new Date().getFullYear() }} — <strong>Name</strong>
     </div>
   </div>
