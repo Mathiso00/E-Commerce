@@ -38,22 +38,28 @@ class ProductController extends AbstractController
     #[Route('', name: "create", methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
-        $product = $serializer->deserialize($request->getContent(), Product::class, 'json');
-        $requiredProperties = ['name', 'description', 'price'];
-        
-        // Check if all required properties are present in the Product object
-        foreach ($requiredProperties as $property) {
-            $getter = 'get' . ucfirst($property);
-            if (!property_exists($product, $property) || $product->{$getter}() === null) {
-                return new JsonResponse(sprintf('Missing property: %s', $property), JsonResponse::HTTP_BAD_REQUEST);
-            }
+        try {
+            $product = $serializer->deserialize($request->getContent(), Product::class, 'json');
+            $requiredProperties = ['name', 'description', 'price'];
+            
+            // Check if all required properties are present in the Product object
+            foreach ($requiredProperties as $property) {
+                $getter = 'get' . ucfirst($property);
+                if (!property_exists($product, $property) || !$product->{$getter}() === null) {
+                    return new JsonResponse(sprintf('Missing property: %s', $property), JsonResponse::HTTP_BAD_REQUEST);
+                }
+            }   
+            // Check price 
+            $this->checkPrice($product->getPrice());
+            
+            $entityManager->persist($product);
+            $entityManager->flush();
+            
+            $data = $serializer->serialize($product, 'json');
+            return new JsonResponse($data, JsonResponse::HTTP_CREATED, [], true);
+        } catch (\Exception $e) {
+            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
         }
-        
-        $entityManager->persist($product);
-        $entityManager->flush();
-        
-        $data = $serializer->serialize($product, 'json');
-        return new JsonResponse($data, JsonResponse::HTTP_CREATED, [], true);
     }
     
     #[Route('/{productId<\d+>}', name: "update", methods: ['PUT'])]
@@ -87,6 +93,18 @@ class ProductController extends AbstractController
         $entityManager->flush();
     
         return new JsonResponse('Product deleted successfully', JsonResponse::HTTP_NO_CONTENT);
+    }
+
+    public function checkPrice($price)
+    {
+        if ($price <= 0) {
+            print("I come ");
+            throw new \Exception("Price need to be more than 0", JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        if (!preg_match('/^\d+(\.\d{1,2})?$/', floatval($price))) {
+            throw new \Exception("The price is not correct ! Only 2 numbers after the dot", JsonResponse::HTTP_BAD_REQUEST);
+        }
     }
     
 }
