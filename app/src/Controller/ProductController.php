@@ -22,7 +22,7 @@ class ProductController extends AbstractController
         return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
     }
     
-    #[Route('/{productId}', name: "show_one", methods: ['GET'])]
+    #[Route('/{productId<\d+>}', name: "show_one", methods: ['GET'])]
     public function show(EntityManagerInterface $entityManager, SerializerInterface $serializer, int $productId): JsonResponse
     {
         $product = $entityManager->getRepository(Product::class)->find($productId);
@@ -56,7 +56,7 @@ class ProductController extends AbstractController
         return new JsonResponse($data, JsonResponse::HTTP_CREATED, [], true);
     }
     
-    #[Route('/{productId}', name: "update", methods: ['PUT'])]
+    #[Route('/{productId<\d+>}', name: "update", methods: ['PUT'])]
     public function update(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, int $productId): JsonResponse
     {
         $product = $entityManager->getRepository(Product::class)->find($productId);
@@ -74,7 +74,7 @@ class ProductController extends AbstractController
         return new JsonResponse($serializer->serialize($product, 'json'), JsonResponse::HTTP_OK, [], true);
     }
             
-    #[Route('/{productId}', name: "delete", methods: ['DELETE'])]
+    #[Route('/{productId<\d+>}', name: "delete", methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, int $productId): JsonResponse
     {
         $product = $entityManager->getRepository(Product::class)->find($productId);

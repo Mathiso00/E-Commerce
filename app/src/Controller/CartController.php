@@ -6,11 +6,9 @@ use App\Entity\Cart;
 use App\Entity\Order;
 use App\Entity\Product;
 use App\Entity\CartItem;
+use App\Service\UserService;
 use App\Entity\OrderProduct;
-use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,43 +17,53 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 /**
  * @Route("/api/carts", name="cart_")
  */
+#[Route('/api/carts', name: "cart_")]
 class CartController extends AbstractController
 {
 
-    /**
-     * @Route("/{productId<\d+>}", name="cart_add", methods={"POST"})
-     */
-    public function addToCart(Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository, $productId): JsonResponse
+    private $userService;
+    private $entityManager;
+
+    public function __construct(UserService $userService, EntityManagerInterface $entityManagerInterface)
     {
-        $productId = intval($productId);
-        $product = $entityManager->getRepository(Product::class)->find($productId);
+        $this->userService = $userService;
+        $this->entityManager = $entityManagerInterface;
+    }
 
-        if (!$product) {
-            return new JsonResponse(['status' => 404, 'message' => 'Product not found!'], Response::HTTP_NOT_FOUND);
+    #[Route('/{productId<\d+>}', name: "cart_add", methods: ['POST'])]
+    public function addToCart($productId): JsonResponse
+    {
+        try {
+            $user = $this->getUserByToken();
+
+            $product = $this->entityManager->getRepository(Product::class)->find($productId);
+            if (!$product) {
+                return new JsonResponse("Product not found !", JsonResponse::HTTP_NOT_FOUND);
+            }
+            
+            $cart = $this->entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
+            if (!$cart) {
+                $cart = new Cart();
+                $cart->setUser($user);
+                $this->entityManager->persist($cart);
+            }
+
+            $check = $this->checkDuplication($user->getId(), $productId);
+            if($check) {
+                return new JsonResponse("Quantity updated", JsonResponse::HTTP_OK);
+            } 
+
+            $cartItem = new CartItem();
+            $cartItem->setProduct($product);
+            $cartItem->setQuantity(1);
+            $cartItem->setCart($cart);
+            $this->entityManager->persist($cartItem);
+            $this->entityManager->flush();
+    
+            return new JsonResponse("Product added to cart", JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
         }
-
-        $user = $this->getUser();
-
-        if (!$user || !$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return new JsonResponse(['status' => 401, 'message' => 'You must be authenticated to add items to the cart'], Response::HTTP_UNAUTHORIZED);
-        }
-
-        $cart = $entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
-
-        if (!$cart) {
-            $cart = new Cart();
-            $cart->setUser($user);
-            $entityManager->persist($cart);
-        }
-
-        $cartItem = new CartItem();
-        $cartItem->setProduct($product);
-        $cartItem->setQuantity(1);
-        $cartItem->setCart($cart);
-        $entityManager->persist($cartItem);
-        $entityManager->flush();
-
-        return new JsonResponse(['status' => 200, 'message' => 'Product added to cart successfully']);
     }
 
     /**
@@ -169,7 +177,35 @@ class CartController extends AbstractController
         //dd($cart->getCartItems());
         $entityManager->remove($cart);
 
-        return new JsonResponse(["statut"=> 201, $orderData ], JsonResponse::HTTP_CREATED);
+        return new JsonResponse(["statut"=> JsonResponse::HTTP_CREATED, $orderData ], JsonResponse::HTTP_CREATED);
+    }
+
+    public function checkDuplication(int $userId, int $productId): bool
+    {
+        $cartItems = $this->entityManager->getRepository(CartItem::class)->findAll();
+        if(sizeof($cartItems) > 0) {
+            foreach ($cartItems as $value) {
+                $cartProductId = $value->getProduct()->getId();
+                $cartUserId = $value->getCart()->getUser()->getId();
+                if($cartProductId === $productId && $cartUserId === $userId) {
+                    $this->upgradeQuantity($value, $this->entityManager);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public function upgradeQuantity(CartItem $cartItem): void
+    {
+        $cartItem->setQuantity($cartItem->getQuantity() + 1);
+        $this->entityManager->flush();
+    }
+
+    public function getUserByToken()
+    {
+        $userMail = $this->userService->getUserEmail();
+        return $this->userService->findUserByEmail($userMail);
     }
 
 

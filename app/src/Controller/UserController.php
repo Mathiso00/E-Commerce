@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Service\UserService;
-use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,13 +14,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class UserController extends AbstractController
 {
     private $manager;
-    private $userRepository;
     private $userService;
 
-    public function __construct(EntityManagerInterface $manager, UserRepository $userRepository, UserService $userService)
+    public function __construct(EntityManagerInterface $manager, UserService $userService)
     {
         $this->manager = $manager;
-        $this->userRepository = $userRepository;
         $this->userService = $userService;
     }
     
@@ -31,7 +28,7 @@ class UserController extends AbstractController
     {
         try {
             $email = $this->userService->getUserEmail();
-            $user = $this->userService->findUserByEmail($email, $this->userRepository);
+            $user = $this->userService->findUserByEmail($email);
             $data = $serializer->serialize($user, 'json', [
                 'groups' => ['api']
             ]);
@@ -55,7 +52,7 @@ class UserController extends AbstractController
         }
         try {
             $email = $this->userService->getUserEmail();
-            $user = $this->userService->findUserByEmail($email, $this->userRepository);
+            $user = $this->userService->findUserByEmail($email);
     
             $user->setFirstname(isset($newData['firstname']) ? $this->userService->Sanitize($newData['firstname']) : $user->getFirstname());
             $user->setLastname(isset($newData['lastname']) ? $this->userService->Sanitize($newData['lastname']) : $user->getLastname());

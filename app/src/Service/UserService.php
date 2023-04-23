@@ -12,11 +12,13 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 class UserService
 {
     private $tokenStorageInterface;
+    private $userRepository;
     private $jwtManager;
 
-    public function __construct(TokenStorageInterface $tokenStorageInterface, JWTTokenManagerInterface $jwtManager)
+    public function __construct(TokenStorageInterface $tokenStorageInterface, JWTTokenManagerInterface $jwtManager,  UserRepository $userRepository)
     {
         $this->tokenStorageInterface = $tokenStorageInterface;
+        $this->userRepository = $userRepository;
         $this->jwtManager = $jwtManager;
     }
 
@@ -43,9 +45,9 @@ class UserService
         throw new \Exception("Invalid data type. Expected a string.", JsonResponse::HTTP_BAD_REQUEST);
     }
 
-    public function findUserByEmail(String $email, UserRepository $userRepository): ?User
+    public function findUserByEmail(String $email): ?User
     {
-        $user = $userRepository->findOneBy(array('email' => $email));
+        $user = $this->userRepository->findOneBy(array('email' => $email));
         if($user === null) {
             throw new \Exception("You didn't exist. How are you come here...", 401);
         }
