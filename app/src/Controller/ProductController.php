@@ -18,7 +18,7 @@ class ProductController extends AbstractController
     {
         $products = $entityManager->getRepository(Product::class)->findAll();
         $data = $serializer->serialize($products, 'json');
-        if(empty($data)) return new JsonResponse("No product found !", JsonResponse::HTTP_OK);
+        if(empty($data)) return new JsonResponse("No product found !", JsonResponse::HTTP_NO_CONTENT);
         return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
     }
     
@@ -97,9 +97,8 @@ class ProductController extends AbstractController
 
     public function checkPrice($price)
     {
-        if ($price <= 0) {
-            print("I come ");
-            throw new \Exception("Price need to be more than 0", JsonResponse::HTTP_BAD_REQUEST);
+        if ($price <= 1) {
+            throw new \Exception("Price need to be more than 1, I need to make money !", JsonResponse::HTTP_BAD_REQUEST);
         }
 
         if (!preg_match('/^\d+(\.\d{1,2})?$/', floatval($price))) {

@@ -106,16 +106,4 @@ class Product
 
         return $this;
     }
-
-    public function removeCartItem(CartItem $cartItem): self
-    {
-        if ($this->cartItems->removeElement($cartItem)) {
-            // set the owning side to null (unless already changed)
-            if ($cartItem->getProduct() === $this) {
-                $cartItem->setProduct(null);
-            }
-        }
-
-        return $this;
-    }
 }

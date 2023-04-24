@@ -7,16 +7,14 @@ use App\Entity\Order;
 use App\Entity\Product;
 use App\Entity\CartItem;
 use App\Service\UserService;
-use App\Entity\OrderProduct;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+// TODO: 204 if no content !
+// TODO: CREATE FUNC FOR RETURN ORDER !
 
-/**
- * @Route("/api/carts", name="cart_")
- */
 #[Route('/api/carts', name: "cart_")]
 class CartController extends AbstractController
 {
@@ -66,118 +64,109 @@ class CartController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/{productId<\d+>}", name="remove_from_cart", methods={"DELETE"})
-     */
-    public function removeFromCart(EntityManagerInterface $entityManager, $productId)
+    #[Route('/{productId<\d+>}', name: "remove_from_cart", methods: ['DELETE'])]
+    public function removeFromCart($productId): JsonResponse
     {
-        $user = $this->getUser();
-        $cart = $user->getCart();
+        try {
+            $user = $this->getUserByToken();
+            $cart = $user->getCart();
+    
+            if($cart === null) {
+                return new JsonResponse("The cart doesn't exist !", JsonResponse::HTTP_NOT_FOUND);
+            }
 
-        $cartItem = $cart->getCartItemByProductId($productId);
-
-        if (!$cartItem) {
-            return new JsonResponse(['status' => 404, 'message' => 'Product not found in cart.'], JsonResponse::HTTP_NOT_FOUND);
+            $cartItem = $cart->getCartItemByProductId($productId);
+    
+            if (!$cartItem) {
+                return new JsonResponse("Product not found !", JsonResponse::HTTP_NOT_FOUND);
+            }
+    
+            $this->entityManager->remove($cartItem);
+            $this->entityManager->flush();
+            if($cart->getCartItems()->count() === 0) {
+                $this->entityManager->remove($cart);
+                $this->entityManager->flush();
+            }
+    
+            return new JsonResponse('Item deleted', JsonResponse::HTTP_NO_CONTENT);
+        } catch (\Exception $e) {
+            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
         }
-
-        $cart->removeCartItem($cartItem);
-
-        $entityManager->persist($cart);
-        $entityManager->flush();
-
-        return new JsonResponse(['status' => 204], JsonResponse::HTTP_NO_CONTENT);
     }
 
-    /**
-     * @Route(" ", name="cart_list", methods={"GET"})
-     */
-    public function cartList()
+    #[Route('', name: "cart_list", methods: ['GET'])]
+    public function getCartList(): JsonResponse
     {
-        $user = $this->getUser();
-        $cart = $user->getCart();
+        try {
+            $user = $this->getUserByToken();
+            $cart = $user->getCart();
+            
+            if($cart === null) {
+                return new JsonResponse("No cart and cart items", JsonResponse::HTTP_NO_CONTENT);
+            }
 
-        $cartItems = $cart->getCartItems();
-
-        $responseArray = [];
-        foreach ($cartItems as $cartItem) {
-            $responseArray[] = [
-                'product_id' => $cartItem->getProduct()->getId(),
-                'product_name' => $cartItem->getProduct()->getName(),
-                'quantity' => $cartItem->getQuantity(),
-                'price' => $cartItem->getProduct()->getPrice(),
-            ];
+            $cartItems = $cart->getCartItems();
+            if ($cartItems->count() === 0) {
+                return new JsonResponse("Array empty", JsonResponse::HTTP_NO_CONTENT);
+            }
+    
+            $responseArray = [];
+            foreach ($cartItems as $cartItem) {
+                $responseArray[] = [
+                    'product_id' => $cartItem->getProduct()->getId(),
+                    'product_name' => $cartItem->getProduct()->getName(),
+                    'quantity' => $cartItem->getQuantity(),
+                    'price' => $cartItem->getProduct()->getPrice(),
+                ];
+            }
+            return new JsonResponse($responseArray, JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
         }
-
-        return new JsonResponse($responseArray);
     }
 
-    /**
-    * @Route("/validate", name="validate_cart", methods={"POST"})
-    */
-    public function validateCart(EntityManagerInterface $entityManager)
+    #[Route('/validate', name: "validate_cart", methods: ['POST'])]
+    public function validateCart()
     {
-        $user = $this->getUser();
-        $cart = $user->getCart();
+        try {
+            $user = $this->getUserByToken();
+            $cart = $user->getCart();
 
-        $cartItems = $cart->getCartItems();
+            if($cart === null) {
+                return new JsonResponse("No cart and cart items", JsonResponse::HTTP_NO_CONTENT);
+            }
+    
+            $cartItems = $cart->getCartItems();
+    
+            if ($cartItems->count() === 0) {
+                return new JsonResponse('Cart is empty', JsonResponse::HTTP_BAD_REQUEST);
+            }
+    
+            // Calculate total price (At least 1$/€/£ cause of price check in productController)
+            $totalPrice = $cart->calculateTotalPrice();
 
+            // Create order entity
+            $productList = [];
+            foreach ($cartItems as $cartItem) {
+                for ($i = 1; $i <= $cartItem->getQuantity() ; $i++) {
+                    array_push($productList, $cartItem->getProduct()->getId());
+                }
+            }
+            $order = new Order();
+            $order->setUser($user);
+            $order->setTotalPrice($totalPrice);
+            $order->setCreationDate(new \DateTime());
+            $order->setProductList($productList);
 
-        if ($cartItems->count() === 0) {
-            return new JsonResponse(['message' => 'Cart is empty.'], JsonResponse::HTTP_BAD_REQUEST);
+            // Persist and flush changes to database
+            $this->entityManager->persist($order);
+            $this->entityManager->remove($cart);
+            $this->entityManager->flush();
+    
+            return new JsonResponse($order, JsonResponse::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
         }
-
-        // Calculate total price
-        $totalPrice = $cart->calculateTotalPrice();
-
-        // Create order entity
-        $order = new Order();
-        $order->setUser($user);
-        $order->setTotalPrice($totalPrice);
-        $order->setCreationDate(new \DateTime());
-
-        foreach ($cartItems as $cartItem) {
-
-            // Create order product entity for each cart item
-            $orderProduct = new OrderProduct();
-            $orderProduct->setCommand($order);
-            $orderProduct->setName($cartItem->getProduct()->getName());
-            $orderProduct->setDescription($cartItem->getProduct()->getDescription());
-            $orderProduct->setPhoto($cartItem->getProduct()->getPhoto());
-            $orderProduct->setPrice($cartItem->getProduct()->getPrice());
-            $entityManager->persist($orderProduct);
-
-            // Remove cart item
-            // $entityManager->remove($cartItem);
-        }
-
-
-        // Persist and flush changes to database
-        $entityManager->persist($order);
-        $entityManager->flush();
-
-
-        // Return order information as response
-        $orderData = [
-            'id' => $order->getId(),
-            'totalPrice' => $order->getTotalPrice(),
-            'creationDate' => $order->getCreationDate()->format(\DateTimeInterface::ISO8601),
-            'products' => $cartItems,
-        ];
-
-        foreach ($order->getOrderProducts() as $orderProduct) {
-            $orderData['products'][] = [
-                'id' => $orderProduct->getId(),
-                'name' => $orderProduct->getName(),
-                'description' => $orderProduct->getDescription(),
-                'photo' => $orderProduct->getPhoto(),
-                'price' => $orderProduct->getPrice(),
-            ];
-        }
-        // Remove cart
-        //dd($cart->getCartItems());
-        $entityManager->remove($cart);
-
-        return new JsonResponse(["statut"=> JsonResponse::HTTP_CREATED, $orderData ], JsonResponse::HTTP_CREATED);
     }
 
     public function checkDuplication(int $userId, int $productId): bool
