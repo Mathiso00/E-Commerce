@@ -4,7 +4,33 @@
   apt:
     update_cache: yes
     name: 
-      - git
       - curl
-      - sudo
+      - lsb-release 
+      - apt-transport-https 
+      - ca-certificates 
+      - software-properties-common  
+      - snapd
     state: present
+
+- name: Import repository GPG key
+  command: sudo wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg 
+
+- name: Add repository to sources list
+  command: sudo sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+
+- name: Update
+  apt:
+    update_cache: yes
+
+- name: Install core
+  command: snap install core
+
+- name: Install certbot
+  command: snap install --classic certbot
+
+- name: Establish link to certbot
+  file:
+    src: '/snap/bin/certbot'
+    dest: '/usr/bin/certbot'
+    state: link
+
