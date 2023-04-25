@@ -16,6 +16,11 @@ Une clé ssh appelée EcommercekeyVPS qui est utilisée par ansible pour se conn
 
 ### Vault
 
+
+PARLER DES .ENV (.env.maria)
+# To generate fake data
+php bin/console doctrine:fixtures:load
+
 Un fichier vault_pass.txt est utilisé par ansible pour avoir le mot de passe du vault qui contient des passwords utilisés par ansible au moment de l'installation
 
 ### JWT

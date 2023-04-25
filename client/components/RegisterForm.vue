@@ -47,6 +47,7 @@ import {useDisplay} from "vuetify";
 import { Ref } from 'vue'
 import { ref } from "@vue/reactivity";
 import {signUp} from "~/composables/useAuth";
+import {navigateTo} from "#app/composables/router";
 
 const { smAndUp, mdAndUp } = useDisplay();
 const firstname: Ref<string> = ref('');
@@ -108,6 +109,7 @@ async function signUser() {
       let response = await signUp(firstname.value, lastname.value, email.value, password.value);
       if(response){
         success.value = 'Your account was successfully created.'
+        navigateTo('/login');
       }
     }
   }catch (e) {

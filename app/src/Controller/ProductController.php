@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
@@ -19,13 +20,27 @@ class ProductController extends AbstractController
     /**
      * @Route("/", name="index", methods={"GET"})
      */
-    public function index(EntityManagerInterface $entityManager, SerializerInterface $serialize): Response
+    public function index(EntityManagerInterface $entityManager, SerializerInterface $serialize): JsonResponse
     {
         $products = $entityManager->getRepository(Product::class)->findAll();
-        $data = $serialize->serialize($products, 'json');
-        return new Response($data, 200, [
-            'Content-Type' => 'application/json'
+
+        $circularReferenceHandler = function ($object) {
+            return $object->getId();
+        };
+
+        $serializedProducts = $serialize->serialize($products, 'json', [
+            AbstractNormalizer::IGNORED_ATTRIBUTES => ['user'],
+            'circular_reference_handler' => $circularReferenceHandler,
         ]);
+        // Return the Products as a JSON response
+        return new JsonResponse([
+            'status' => 200,
+            'products' => json_decode($serializedProducts),
+        ]);
+        // $data = $serialize->serialize($products, 'json');
+        // return new Response($data, 200, [
+        //     'Content-Type' => 'application/json'
+        // ]);
     }
 
      /**
@@ -39,9 +54,20 @@ class ProductController extends AbstractController
             return new JsonResponse(['status' => 404, 'message' => 'Product not found'], Response::HTTP_NOT_FOUND);
         }
 
-        $data = $serializer->serialize($product, 'json');
 
-        return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
+        $circularReferenceHandler = function ($object) {
+            return $object->getId();
+        };
+
+        $serializedProduct = $serializer->serialize($product, 'json', [
+            AbstractNormalizer::IGNORED_ATTRIBUTES => ['user'],
+            'circular_reference_handler' => $circularReferenceHandler,
+        ]);
+
+        return new JsonResponse([
+            'status' => 200,
+            'product' => json_decode($serializedProduct),
+        ]);
     }
 
         /**
