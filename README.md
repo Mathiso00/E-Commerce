@@ -12,3 +12,5 @@ INSTALL
 
 
 PARLER DES .ENV (.env.maria)
+# To generate fake data
+php bin/console doctrine:fixtures:load

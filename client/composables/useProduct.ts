@@ -6,7 +6,7 @@ export async function getProducts(): Promise<any>{
     try {
         //const data = await $http.$get(`${config.apiBaseUrl}/products`);
         const data = await $http.$get(`https://localhost:8000/api/products`);
-        console.log(data);
+        //console.log(data);
         return data;
     }catch (e) {
        console.log(e)
