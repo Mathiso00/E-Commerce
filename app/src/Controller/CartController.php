@@ -6,6 +6,7 @@ use App\Entity\Cart;
 use App\Entity\Order;
 use App\Entity\Product;
 use App\Entity\CartItem;
+use App\Entity\OrderProduct;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -32,7 +33,7 @@ class CartController extends AbstractController
     public function addToCart($productId): JsonResponse
     {
         try {
-            $user = $this->getUserByToken();
+            $user = $this->userService->getUserByToken();
 
             $product = $this->entityManager->getRepository(Product::class)->find($productId);
             if (!$product) {
@@ -68,7 +69,7 @@ class CartController extends AbstractController
     public function removeFromCart($productId): JsonResponse
     {
         try {
-            $user = $this->getUserByToken();
+            $user = $this->userService->getUserByToken();
             $cart = $user->getCart();
     
             if($cart === null) {
@@ -98,7 +99,7 @@ class CartController extends AbstractController
     public function getCartList(): JsonResponse
     {
         try {
-            $user = $this->getUserByToken();
+            $user = $this->userService->getUserByToken();
             $cart = $user->getCart();
             
             if($cart === null) {
@@ -129,7 +130,7 @@ class CartController extends AbstractController
     public function validateCart()
     {
         try {
-            $user = $this->getUserByToken();
+            $user = $this->userService->getUserByToken();
             $cart = $user->getCart();
 
             if($cart === null) {
@@ -146,17 +147,17 @@ class CartController extends AbstractController
             $totalPrice = $cart->calculateTotalPrice();
 
             // Create order entity
-            $productList = [];
-            foreach ($cartItems as $cartItem) {
-                for ($i = 1; $i <= $cartItem->getQuantity() ; $i++) {
-                    array_push($productList, $cartItem->getProduct()->getId());
-                }
-            }
             $order = new Order();
             $order->setUser($user);
             $order->setTotalPrice($totalPrice);
             $order->setCreationDate(new \DateTime());
-            $order->setProductList($productList);
+            foreach ($cartItems as $cartItem) {
+                $orderProduct = new OrderProduct();
+                $orderProduct->setOrder($order)
+                             ->setProduct($cartItem->getProduct())
+                             ->setQuantity($cartItem->getQuantity());
+                $this->entityManager->persist($orderProduct);
+            }
 
             // Persist and flush changes to database
             $this->entityManager->persist($order);
@@ -190,12 +191,5 @@ class CartController extends AbstractController
         $cartItem->setQuantity($cartItem->getQuantity() + 1);
         $this->entityManager->flush();
     }
-
-    public function getUserByToken()
-    {
-        $userMail = $this->userService->getUserEmail();
-        return $this->userService->findUserByEmail($userMail);
-    }
-
 
 }

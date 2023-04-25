@@ -53,4 +53,11 @@ class UserService
         }
         return $user;
     }
+
+
+    public function getUserByToken()
+    {
+        $userMail = $this->getUserEmail();
+        return $this->findUserByEmail($userMail);
+    }
 }

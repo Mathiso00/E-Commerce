@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\OrderRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -24,19 +26,20 @@ class Order
     #[ORM\ManyToOne(inversedBy: 'orders')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
-
-    #[ORM\Column(type: Types::SIMPLE_ARRAY)]
-    private array $productList = [];
+    
+    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderProduct::class, cascade:['persist'])]
+    private Collection $orderProducts;
 
     public function __construct()
     {
+        $this->orderProducts = new ArrayCollection();
     }
-
+    
     public function getId(): ?int
     {
         return $this->id;
     }
-
+    
     public function getTotalPrice(): ?float
     {
         return $this->totalPrice;
@@ -73,14 +76,26 @@ class Order
         return $this;
     }
 
-    public function getProductList(): array
+    /**
+     * @return Collection<int, OrderProduct>
+     */
+    public function getProducts(): Collection
     {
-        return $this->productList;
+        return $this->orderProducts;
     }
 
-    public function setProductList(array $productList): self
+    public function addProductList(OrderProduct $productList): self
     {
-        $this->productList = $productList;
+        if (!$this->orderProducts->contains($productList)) {
+            $this->orderProducts->add($productList);
+        }
+
+        return $this;
+    }
+
+    public function removeProductList(OrderProduct $productList): self
+    {
+        $this->orderProducts->removeElement($productList);
 
         return $this;
     }
