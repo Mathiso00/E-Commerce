@@ -37,7 +37,7 @@
     group: "server"
 
 - name: Create symfony key
-  command: php bin/console lexik:jwt:generate-keypair
+  command: php bin/console lexik:jwt:generate-keypair --overwrite
   args:
     chdir: /var/app
 
