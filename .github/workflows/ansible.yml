@@ -12,18 +12,12 @@ jobs:
         fetch-depth: 0 # Fetch depth set to 0 means that all commits are to be mirrored
     - name: Create env
       run: echo "${{ secrets.ENV_FILE }}" > .env
-    - name: Create env
+    - name: Create env front
       run: echo "${{ secrets.ENV_CLIENT }}" > .env_client
-    - name: test env
+    - name: Create env back
       run: cat .env
     - name: Create vault pass
       run: echo "${{ secrets.VAULT_PASS }}" > ./vault_pass.txt
-    - name: Create jwt dir
-      run: mkdir jwt
-    - name: Create jwt private key
-      run: echo "${{ secrets.PRIVATE_JWT }}" > ./jwt/private.pem
-    - name: Create jwt public key
-      run: echo "${{ secrets.PUBLIC_JWT }}" > ./jwt/public.pem
     - name: Create ssh key
       run: echo "${{ secrets.ECOMMERCEKEYVPS }}" > ./EcommercekeyVPS
     - name: Change right on key
