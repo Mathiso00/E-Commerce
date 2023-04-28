@@ -1,0 +1,31 @@
+---
+# tasks file for mariadbinstall
+- name: Install MariaDB and pip3
+  apt:
+      name: 
+        - mariadb-server
+        - python3-pip
+
+- name: Install pymysql
+  pip:
+    name: pymysql
+    state: present
+
+- name: Create db
+  become: true
+  mysql_db:
+    name: ecommerce
+    state: present
+    login_user: root
+    login_unix_socket: /run/mysqld/mysqld.sock
+    login_password: "{{ root_password }}"
+
+- name: Create user
+  mysql_user:
+    login_user: root
+    login_password: "{{ root_password }}"
+    login_unix_socket: /run/mysqld/mysqld.sock
+    name: superUser
+    password: "{{ maria_user }}"
+    state: present
+    priv: '*.*:ALL,GRANT'
