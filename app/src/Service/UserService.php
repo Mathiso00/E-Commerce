@@ -37,19 +37,11 @@ class UserService
         return $email;
     }
 
-    public function Sanitize($var): string
-    {
-        if(is_string($var)) {
-            return filter_var($var, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        }
-        throw new \Exception("Invalid data type. Expected a string.", JsonResponse::HTTP_BAD_REQUEST);
-    }
-
     public function findUserByEmail(String $email): ?User
     {
         $user = $this->userRepository->findOneBy(array('email' => $email));
         if($user === null) {
-            throw new \Exception("You didn't exist. How are you come here...", 401);
+            throw new \Exception("You didn't exist. How are you come here...", JsonResponse::HTTP_UNAUTHORIZED);
         }
         return $user;
     }
@@ -60,4 +52,13 @@ class UserService
         $userMail = $this->getUserEmail();
         return $this->findUserByEmail($userMail);
     }
+
+    public function Sanitize($var): string
+    {
+        if(is_string($var)) {
+            return filter_var($var, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        }
+        throw new \Exception("Invalid data type. Expected a string.", JsonResponse::HTTP_BAD_REQUEST);
+    }
+
 }
