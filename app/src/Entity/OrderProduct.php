@@ -25,7 +25,6 @@ class OrderProduct
     private ?Order $order;
     
     #[ORM\ManyToOne(inversedBy: 'orderProducts')]
-    #[SerializedName(' ')]
     #[Ignore]
     private ?Product $product;
     

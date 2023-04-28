@@ -59,10 +59,11 @@ class OrderController extends AbstractController
     /**
      * @Route("/{orderId}", name="get_order", methods={"GET"})
      */
-    public function getOrder(int $orderId, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+    #[Route('/{orderId<\d+>}', name: "get_order", methods: ['GET'])]
+    public function getOrder(int $orderId, SerializerInterface $serializer): JsonResponse
     {
         // Get the order from the database
-        $order = $entityManager->getRepository(Order::class)->find($orderId);
+        $order = $this->entityManager->getRepository(Order::class)->find($orderId);
 
         // If the order does not exist, return a 404 response
         if (!$order) {
