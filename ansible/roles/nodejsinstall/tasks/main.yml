@@ -6,14 +6,14 @@
 - name: Install the nodejs
   become: true
   apt:
-    name: 
+    name:
       - nodejs
     state: present
 
 # move project    change to avoid node module
 - name: Copy nuxt project
   become: true
-  copy: 
+  copy:
     src: ../../../../client/
     dest: /var/www/client/
     owner: "server"
@@ -21,7 +21,7 @@
 
 - name: Copy .env
   become: true
-  copy: 
+  copy:
     src: ../../../../.env_client
     dest: /var/www/client/.env
     owner: "server"
@@ -37,7 +37,6 @@
   shell: npm run generate
   args:
     chdir: /var/www/client
-
 # - name: restart apache
 #   become: true
 #   shell: service apache2 restart

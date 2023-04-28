@@ -1,20 +1,18 @@
 ---
 # tasks file for apacheinstall
-- name: Install apache2
+- name: Install nginx
   apt:
-      name: 
-        - apache2
-      state: present
+    name:
+      - nginx
+    state: present
 
-- name: Change configuration
+- name: Change configuration front
   template:
-    src: templates/000-default.conf
-    dest: /etc/apache2/sites-available/000-default.conf
+    src: templates/default
+    dest: /etc/nginx/sites-available/default
 
 - name: Create cerbot certificate
-  shell: sudo certbot --apache -d ultimategaminggear.tech -m mathis.onillon@epitech.eu --non-interactive --agree-tos
+  shell: sudo certbot --nginx -d ultimategaminggear.tech -m mathis.onillon@epitech.eu --non-interactive --agree-tos
 
-- name: Restart apache
-  shell: service apache2 restart
-
-
+- name: Restart nginx
+  shell: nginx -s reload
