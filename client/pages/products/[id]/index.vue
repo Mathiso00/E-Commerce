@@ -13,14 +13,16 @@
                   :length="4"
                   rounded="0"
               ></v-pagination>
+
             </div>
             <v-card-text>{{product.description}}</v-card-text>
-            <div class="d-flex flex-column my-5 border py-4 px-5">
+            <div class="d-flex flex-column my-10 border py-10 px-5">
               <div class=" px-2 text-center font-weight-bold">{{product.price}} €</div>
               <v-select
-                  :items="items"
+                  label="Quantity"
+                  :items="options"
                   density="compact"
-                  class="bg-white my-5 "
+                  class="bg-white my-10 "
               ></v-select>
               <v-btn class="rounded px-4 text-center mb-5 text-white" style="background-color: #1d1d1b"> Add to cart </v-btn>
               <v-btn class="rounded px-4 text-center text-white" style="background-color: #BAA64F"> BUY </v-btn>
@@ -43,6 +45,8 @@ const route = useRoute();
   const data = await getProduct(parseInt(route.params.id, 10));
   const product = data.product
   console.log(data.product)
+
+const options = [1, 2, 3, 4]
   const arrayImage = [
     {
       url: product.photo,
