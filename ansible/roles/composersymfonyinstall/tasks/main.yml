@@ -25,28 +25,25 @@
   become: true
   apt:
     update_cache: yes
-    name: 
+    name:
       - symfony-cli
 
 - name: Copy symfony project
   become: true
-  copy: 
+  copy:
     src: ../../../../app/
     dest: /var/app/
     owner: "server"
     group: "server"
 
-- name: Copy jwt directory
-  become: true
-  copy: 
-    src: ../../../../jwt
-    dest: /var/app/config/
-    owner: "server"
-    group: "server"
+- name: Create symfony key
+  command: php bin/console lexik:jwt:generate-keypair --overwrite
+  args:
+    chdir: /var/app
 
 - name: Copy .env
   become: true
-  copy: 
+  copy:
     src: ../../../../.env
     dest: /var/app/.env
     owner: "server"
@@ -59,7 +56,6 @@
   command: composer update
   args:
     chdir: /var/app
-
 
 # Install dependencies need to create user and change user https://github.com/kirelos/symfony-ansible/blob/master/roles/symfony/tasks/main.yml
 - name: Install dependencies
@@ -83,11 +79,9 @@
 - name: Execute migrations
   command: php bin/console doctrine:migrations:migrate --no-interaction
   args:
-      chdir: /var/app
+    chdir: /var/app
 # run
 - name: Run symfony server
   command: symfony server:start -d
   args:
     chdir: /var/app
-
-    

@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api/products', name: "product_")]
@@ -33,7 +34,6 @@ class ProductController extends AbstractController
         
         $data = $serializer->serialize($product, 'json');
         return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
-    }
         
     #[Route('', name: "create", methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
