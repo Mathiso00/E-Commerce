@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Product;
-use App\Service\UserService;
 use App\Service\ResponseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,13 +16,11 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 class ProductController extends AbstractController
 {
     private $entitymanager;
-    private $userService;
     private $responseService;
 
-    public function __construct(EntityManagerInterface $entitymanager, UserService $userService, ResponseService $responseService)
+    public function __construct(EntityManagerInterface $entitymanager, ResponseService $responseService)
     {
         $this->entitymanager = $entitymanager;
-        $this->userService = $userService;
         $this->responseService = $responseService;
     }
 

@@ -8,25 +8,24 @@ use App\Entity\Product;
 use App\Entity\CartItem;
 use App\Entity\OrderProduct;
 use App\Service\UserService;
+use App\Service\ResponseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-// TODO: 204 if no content !
-// TODO: CREATE FUNC FOR RETURN ORDER !
-
 #[Route('/api/carts', name: "cart_")]
 class CartController extends AbstractController
 {
 
     private $userService;
     private $entityManager;
+    private $responseService;
 
-    public function __construct(UserService $userService, EntityManagerInterface $entityManagerInterface)
+    public function __construct(UserService $userService, EntityManagerInterface $entityManagerInterface, ResponseService $responseService)
     {
         $this->userService = $userService;
         $this->entityManager = $entityManagerInterface;
+        $this->responseService = $responseService;
     }
 
     #[Route('/{productId<\d+>}', name: "cart_add", methods: ['POST'])]
@@ -37,7 +36,7 @@ class CartController extends AbstractController
 
             $product = $this->entityManager->getRepository(Product::class)->find($productId);
             if (!$product) {
-                return new JsonResponse("Product not found !", JsonResponse::HTTP_NOT_FOUND);
+                return $this->responseService->returnErrorMessage("Product not found !", JsonResponse::HTTP_NOT_FOUND);
             }
             
             $cart = $this->entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
@@ -49,7 +48,7 @@ class CartController extends AbstractController
 
             $check = $this->checkDuplication($user->getId(), $productId);
             if($check) {
-                return new JsonResponse("Quantity updated", JsonResponse::HTTP_OK);
+                return $this->responseService->returnStringMessage("Quantity updated", JsonResponse::HTTP_OK);
             } 
 
             $cartItem = new CartItem();
@@ -59,9 +58,9 @@ class CartController extends AbstractController
             $this->entityManager->persist($cartItem);
             $this->entityManager->flush();
     
-            return new JsonResponse("Product added to cart", JsonResponse::HTTP_OK);
+            return $this->responseService->returnStringMessage("Product added to cart", JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
+            return $this->responseService->returnErrorMessage($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 
@@ -73,13 +72,13 @@ class CartController extends AbstractController
             $cart = $user->getCart();
     
             if($cart === null) {
-                return new JsonResponse("The cart doesn't exist !", JsonResponse::HTTP_NOT_FOUND);
+                return $this->responseService->returnErrorMessage("The product doesn't exist on your cart !", JsonResponse::HTTP_NOT_FOUND);
             }
 
             $cartItem = $cart->getCartItemByProductId($productId);
     
             if (!$cartItem) {
-                return new JsonResponse("Product not found !", JsonResponse::HTTP_NOT_FOUND);
+                return $this->responseService->returnErrorMessage("The product doesn't exist on your cart !", JsonResponse::HTTP_NOT_FOUND);
             }
     
             $this->entityManager->remove($cartItem);
@@ -89,9 +88,9 @@ class CartController extends AbstractController
                 $this->entityManager->flush();
             }
     
-            return new JsonResponse('Item deleted', JsonResponse::HTTP_NO_CONTENT);
+            return $this->responseService->returnStringMessage('Item deleted', JsonResponse::HTTP_NO_CONTENT);
         } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
+            return $this->responseService->returnErrorMessage($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 
@@ -103,12 +102,12 @@ class CartController extends AbstractController
             $cart = $user->getCart();
             
             if($cart === null) {
-                return new JsonResponse("No cart and cart items", JsonResponse::HTTP_NO_CONTENT);
+                return new JsonResponse("No cart", JsonResponse::HTTP_NO_CONTENT);
             }
 
             $cartItems = $cart->getCartItems();
             if ($cartItems->count() === 0) {
-                return new JsonResponse("Array empty", JsonResponse::HTTP_NO_CONTENT);
+                return new JsonResponse("No items inside the cart", JsonResponse::HTTP_NO_CONTENT);
             }
     
             $responseArray = [];
@@ -122,7 +121,7 @@ class CartController extends AbstractController
             }
             return new JsonResponse($responseArray, JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
+            return $this->responseService->returnErrorMessage($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 
@@ -134,13 +133,13 @@ class CartController extends AbstractController
             $cart = $user->getCart();
 
             if($cart === null) {
-                return new JsonResponse("No cart and cart items", JsonResponse::HTTP_NO_CONTENT);
+                return $this->responseService->returnErrorMessage("No cart", JsonResponse::HTTP_NO_CONTENT);
             }
     
             $cartItems = $cart->getCartItems();
     
             if ($cartItems->count() === 0) {
-                return new JsonResponse('Cart is empty', JsonResponse::HTTP_BAD_REQUEST);
+                return new JsonResponse('No item inside the cart', JsonResponse::HTTP_BAD_REQUEST);
             }
     
             // Calculate total price (At least 1$/€/£ cause of price check in productController)
@@ -164,9 +163,9 @@ class CartController extends AbstractController
             $this->entityManager->remove($cart);
             $this->entityManager->flush();
     
-            return new JsonResponse($order, JsonResponse::HTTP_CREATED);
+            return $this->responseService->returnStringMessage("You'll receive your command a day, maybe...", JsonResponse::HTTP_CREATED);
         } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
+            return $this->responseService->returnErrorMessage($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 

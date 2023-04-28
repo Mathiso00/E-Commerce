@@ -31,8 +31,7 @@ class UserController extends AbstractController
     public function index(SerializerInterface $serializer): JsonResponse
     {
         try {
-            $email = $this->userService->getUserEmail();
-            $user = $this->userService->findUserByEmail($email);
+            $user = $this->userService->getUserByToken();
             $data = $serializer->serialize($user, 'json', [
                 'groups' => ['api']
             ]);
@@ -55,14 +54,12 @@ class UserController extends AbstractController
             return $this->responseService->returnErrorMessage("Empty request Data", JsonResponse::HTTP_BAD_REQUEST);
         }
         try {
-            $email = $this->userService->getUserEmail();
-            $user = $this->userService->findUserByEmail($email);
+            $user = $this->userService->getUserByToken();
 
             if(isset($newData['email'])) {
                 $mailAlreadyTake = $this->manager->getRepository(User::class)->findOneBy(array('email' => $newData['email']));
-                if($mailAlreadyTake !== null && $email !== $newData['email']) {
+                if($mailAlreadyTake !== null && $user->getEmail() !== $newData['email']) {
                     throw new \Exception("Email already used", JsonResponse::HTTP_CONFLICT);
-                    
                 }
             }
             
