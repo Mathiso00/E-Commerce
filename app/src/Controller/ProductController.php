@@ -34,6 +34,7 @@ class ProductController extends AbstractController
         
         $data = $serializer->serialize($product, 'json');
         return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
+    }
         
     #[Route('', name: "create", methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
