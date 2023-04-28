@@ -15,10 +15,10 @@ class Cart
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'cart', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'cart', cascade: ['persist'])]
     private ?User $user = null;
 
-    #[ORM\OneToMany(mappedBy: 'cart', targetEntity: CartItem::class)]
+    #[ORM\OneToMany(mappedBy: 'cart', targetEntity: CartItem::class, cascade: ['remove'])]
     private Collection $cartItems;
 
     public function __construct()
@@ -56,18 +56,6 @@ class Cart
         if (!$this->cartItems->contains($cartItem)) {
             $this->cartItems->add($cartItem);
             $cartItem->setCart($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCartItem(CartItem $cartItem): self
-    {
-        if ($this->cartItems->removeElement($cartItem)) {
-            // set the owning side to null (unless already changed)
-            if ($cartItem->getCart() === $this) {
-                $cartItem->setCart(null);
-            }
         }
 
         return $this;

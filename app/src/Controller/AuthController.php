@@ -53,16 +53,16 @@ class AuthController extends AbstractController
                     
                     $this->manager->persist($user);
                     $this->manager->flush();
-                    return new JsonResponse("User created !", 201, [], true);
+                    return new JsonResponse("User created !", JsonResponse::HTTP_CREATED);
     
                 }
-                return new JsonResponse("Email already used !", 409, [], false);
+                return new JsonResponse("Email already used !", 409);
 
             } catch (\Exception $e) {
-                return new JsonResponse($e->getMessage(), $e->getCode() ?: 500, [], false);
+                return new JsonResponse($e->getMessage(), $e->getCode() ?: 500);
             }
         }
-        return new JsonResponse("Missing email and/or password, I can't register you", 400, [], false);
+        return new JsonResponse("Missing email and/or password, I can't register you", JsonResponse::HTTP_BAD_REQUEST);
     }
     
     public function passwordRequirement($password)
