@@ -3,7 +3,7 @@
     <form v-on:submit.prevent method="POST"
           :class="{ 'w-75': !smAndUp, 'md:w-50': mdAndUp }"
           class="my-5 pt-5 pb-5 w-50 bg-white bord">
-      <div v-if="error" class="text-red"> {{ error }}</div>
+      <div v-if="error" class="text-red text-center"> {{ error }}</div>
       <div v-if="success" class="text-green text-center">{{ success }}</div>
       <h1 class="text-center">Login here </h1>
       <v-text-field
@@ -66,9 +66,9 @@ const validateForm = () => {
   if (!password.value.trim()){
     valid = false;
     errors.value.password +='The password field is required.';
-  }else if(password.value.trim().length < 4){
+  }else if(!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/.test(password.value.trim())){
     valid = false;
-    errors.value.password +='Password needs to be at least 4 characters.';
+    errors.value.password +='Password must contain at least one uppercase letter, one lowercase letter, one digit, and be at least 6 characters long.';
   }
   return valid;
 }

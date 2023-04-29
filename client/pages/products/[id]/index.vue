@@ -38,6 +38,11 @@ import {getProduct} from "~/composables/useProduct";
 import {IProduct} from "~/types/IProduct";
 import {ref} from "@vue/reactivity";
 
+definePageMeta({
+  title: 'product detail',
+  auth: false
+})
+
 const route = useRoute();
 
   const data = await getProduct(parseInt(route.params.id, 10));
