@@ -3,118 +3,122 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Service\ResponseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
-/**
- * @Route("/api/products", name="product_")
- */
+#[Route('/api/products', name: "product_")]
 class ProductController extends AbstractController
 {
-    /**
-     * @Route("/", name="index", methods={"GET"})
-     */
-    public function index(EntityManagerInterface $entityManager, SerializerInterface $serialize): JsonResponse
+    private $entitymanager;
+    private $responseService;
+
+    public function __construct(EntityManagerInterface $entitymanager, ResponseService $responseService)
     {
-        $products = $entityManager->getRepository(Product::class)->findAll();
-
-        $circularReferenceHandler = function ($object) {
-            return $object->getId();
-        };
-
-        $serializedProducts = $serialize->serialize($products, 'json', [
-            AbstractNormalizer::IGNORED_ATTRIBUTES => ['user'],
-            'circular_reference_handler' => $circularReferenceHandler,
-        ]);
-        // Return the Products as a JSON response
-        return new JsonResponse([
-            'status' => 200,
-            'products' => json_decode($serializedProducts),
-        ]);
-        // $data = $serialize->serialize($products, 'json');
-        // return new Response($data, 200, [
-        //     'Content-Type' => 'application/json'
-        // ]);
+        $this->entitymanager = $entitymanager;
+        $this->responseService = $responseService;
     }
 
-     /**
-     * @Route("/{productId}", name="show", methods={"GET"})
-     */
-    public function show(EntityManagerInterface $entityManager, SerializerInterface $serializer, int $productId): JsonResponse
+    #[Route('', name: "show_all", methods: ['GET'])]
+    public function index(SerializerInterface $serializer): JsonResponse
     {
-        $product = $entityManager->getRepository(Product::class)->find($productId);
-
-        if(!$product){
-            return new JsonResponse(['status' => 404, 'message' => 'Product not found'], Response::HTTP_NOT_FOUND);
-        }
-
-
-        $circularReferenceHandler = function ($object) {
-            return $object->getId();
-        };
-
-        $serializedProduct = $serializer->serialize($product, 'json', [
-            AbstractNormalizer::IGNORED_ATTRIBUTES => ['user'],
-            'circular_reference_handler' => $circularReferenceHandler,
-        ]);
-
-        return new JsonResponse([
-            'status' => 200,
-            'product' => json_decode($serializedProduct),
-        ]);
+        $products = $this->entitymanager->getRepository(Product::class)->findAll();
+        $data = $serializer->serialize($products, 'json', [AbstractNormalizer::IGNORED_ATTRIBUTES => ['cartItems']]);
+        if(empty($data)) return $this->responseService->returnErrorMessage("No product found !", JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
     }
-
-        /**
-     * @Route("/", name="create", methods={"POST"})
-     */
-    public function create(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+    
+    #[Route('/{productId<\d+>}', name: "show_one", methods: ['GET'])]
+    public function show(SerializerInterface $serializer, int $productId): JsonResponse
     {
-        $product = $serializer->deserialize($request->getContent(), Product::class, 'json');
-        $entityManager->persist($product);
-        $entityManager->flush();
-
-        return new JsonResponse($serializer->serialize($product, 'json'), JsonResponse::HTTP_CREATED, ['status' => 201, 'message' => 'Product created successfully'], true);
-    }
-
-    /**
-     * @Route("/{productId}", name="update", methods={"PUT"})
-     */
-    public function update(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, int $productId): JsonResponse
-    {
-        $product = $entityManager->getRepository(Product::class)->find($productId);
-
+        $product = $this->entitymanager->getRepository(Product::class)->find($productId);
+        
         if (!$product) {
-            return new JsonResponse(['status' => 404, 'message' => 'Product not found'], Response::HTTP_NOT_FOUND);
+            return $this->responseService->returnErrorMessage("Product not found !", JsonResponse::HTTP_NOT_FOUND);
         }
-
-        $serializer->deserialize($request->getContent(), Product::class, 'json', ['object_to_populate' => $product]);
-        $entityManager->flush();
-
-        return new JsonResponse($serializer->serialize($product, 'json'), JsonResponse::HTTP_OK, ['status' => 200, 'message' => 'Product update successfully'], true);
+        
+        $data = $serializer->serialize($product, 'json', [AbstractNormalizer::IGNORED_ATTRIBUTES => ['cartItems']]);
+        return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
     }
-
-    /**
-     * @Route("/{productId}", name="delete", methods={"DELETE"})
-     */
-    public function delete(EntityManagerInterface $entityManager, int $productId): Response
+        
+    #[Route('', name: "create", methods: ['POST'])]
+    public function create(Request $request, SerializerInterface $serializer): JsonResponse
+    {
+        try {
+            $product = $serializer->deserialize($request->getContent(), Product::class, 'json');
+            $requiredProperties = ['name', 'description', 'price'];
+            
+            // Check if all required properties are present in the Product object
+            foreach ($requiredProperties as $property) {
+                $getter = 'get' . ucfirst($property);
+                if (!property_exists($product, $property)) {
+                    return $this->responseService->returnErrorMessage(sprintf('Missing property: %s', $property), JsonResponse::HTTP_BAD_REQUEST);
+                }
+                if($product->{$getter}() === "") {
+                    return $this->responseService->returnErrorMessage(sprintf('%s is empty', $property), JsonResponse::HTTP_BAD_REQUEST);
+                }
+            }   
+            // Check price 
+            $this->checkPrice($product->getPrice());
+            
+            $this->entitymanager->persist($product);
+            $this->entitymanager->flush();
+            
+            $data = $serializer->serialize($product, 'json', [AbstractNormalizer::IGNORED_ATTRIBUTES => ['cartItems']]);
+            return new JsonResponse($data, JsonResponse::HTTP_CREATED, [], true);
+        } catch (\Exception $e) {
+            return $this->responseService->returnErrorMessage($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+    
+    #[Route('/{productId<\d+>}', name: "update", methods: ['PUT'])]
+    public function update(Request $request, SerializerInterface $serializer, int $productId): JsonResponse
+    {
+        $product = $this->entitymanager->getRepository(Product::class)->find($productId);
+    
+        if (!$product) {
+            return $this->responseService->returnErrorMessage("Product not found !", JsonResponse::HTTP_NOT_FOUND);
+        }
+        if(json_decode($request->getContent(), true) === null || json_decode($request->getContent(), true) === []) {
+            return $this->responseService->returnErrorMessage("No data send !", JsonResponse::HTTP_BAD_REQUEST);
+        }
+        
+        $this->entitymanager->flush();
+        $data = $serializer->serialize($product, 'json', [AbstractNormalizer::IGNORED_ATTRIBUTES => ['cartItems']]);
+    
+        return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
+    }
+            
+    #[Route('/{productId<\d+>}', name: "delete", methods: ['DELETE'])]
+    public function delete(EntityManagerInterface $entityManager, int $productId): JsonResponse
     {
         $product = $entityManager->getRepository(Product::class)->find($productId);
-
+        
         if (!$product) {
-            return new JsonResponse(['status' => 404, 'message' => 'Product not found'], Response::HTTP_NOT_FOUND);
+            return $this->responseService->returnErrorMessage("Product not found !", JsonResponse::HTTP_NOT_FOUND);
         }
-
+    
         $entityManager->remove($product);
         $entityManager->flush();
-
-        // Retourner une réponse HTTP 204 No Content pour indiquer que la suppression a réussi
-        return new Response('Product deleted successfully', Response::HTTP_NO_CONTENT);
+    
+        return $this->responseService->returnStringMessage('Product deleted successfully', JsonResponse::HTTP_NO_CONTENT);
     }
 
+
+    public function checkPrice($price)
+    {
+        if ($price <= 1) {
+            throw new \Exception("Price need to be more than 1, I need to make money !", JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        if (!preg_match('/^\d+(\.\d{1,2})?$/', floatval($price))) {
+            throw new \Exception("The price is not correct ! Only 2 numbers after the dot", JsonResponse::HTTP_BAD_REQUEST);
+        }
+    }
+    
 }

@@ -25,8 +25,8 @@ class Product
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 6, scale: 2)]
-    private ?string $price = null;
+    #[ORM\Column(type: Types::FLOAT, precision: 6, scale: 2)]
+    private ?float $price = null;
 
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: CartItem::class, orphanRemoval: true)]
     private Collection $cartItems;
@@ -77,12 +77,12 @@ class Product
         return $this;
     }
 
-    public function getPrice(): ?string
+    public function getPrice(): ?float
     {
         return $this->price;
     }
 
-    public function setPrice(string $price): self
+    public function setPrice(float $price): self
     {
         $this->price = $price;
 
@@ -102,18 +102,6 @@ class Product
         if (!$this->cartItems->contains($cartItem)) {
             $this->cartItems->add($cartItem);
             $cartItem->setProduct($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCartItem(CartItem $cartItem): self
-    {
-        if ($this->cartItems->removeElement($cartItem)) {
-            // set the owning side to null (unless already changed)
-            if ($cartItem->getProduct() === $this) {
-                $cartItem->setProduct(null);
-            }
         }
 
         return $this;

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Service\UserService;
+use App\Service\ResponseService;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,12 +18,14 @@ class AuthController extends AbstractController
     private $manager;
     private $userRepository;
     private $userService;
+    private $responseService;
     
-    public function __construct(EntityManagerInterface $manager, UserRepository $userRepository, UserService $userService)
+    public function __construct(EntityManagerInterface $manager, UserRepository $userRepository, UserService $userService, ResponseService $responseService)
     {
         $this->manager = $manager;
         $this->userRepository = $userRepository;
         $this->userService = $userService;
+        $this->responseService = $responseService;
     }
     
     #[Route('api/register', name: 'user_create', methods: ['POST'])]
@@ -53,23 +56,23 @@ class AuthController extends AbstractController
                     
                     $this->manager->persist($user);
                     $this->manager->flush();
-                    return new JsonResponse("User created !", 201, [], true);
-    
-                }
-                return new JsonResponse("Email already used !", 409, [], false);
 
+                    return $this->responseService->returnStringMessage("User created !", JsonResponse::HTTP_CREATED);
+                }
+                return $this->responseService->returnErrorMessage("Email already used !", JsonResponse::HTTP_CONFLICT);
+                
             } catch (\Exception $e) {
-                return new JsonResponse($e->getMessage(), $e->getCode() ?: 500, [], false);
+                return $this->responseService->returnErrorMessage($e->getMessage(), $e->getCode() ?: 500);
             }
         }
-        return new JsonResponse("Missing email and/or password, I can't register you", 400, [], false);
+        return $this->responseService->returnErrorMessage("Missing email and/or password, I can't register you", JsonResponse::HTTP_BAD_REQUEST);
     }
     
     public function passwordRequirement($password)
     {
         $regex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/';
         if (!preg_match($regex, $password)) {
-            throw new \Exception("The password doesn't meet the requirements", 422);
+            throw new \Exception("The password doesn't meet the requirements", JsonResponse::HTTP_BAD_REQUEST);
         }
     }
 }

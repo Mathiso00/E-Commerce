@@ -2,96 +2,86 @@
 
 namespace App\Entity;
 
+use App\DTO\ProductDTO;
 use App\Repository\OrderProductRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Ignore;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: OrderProductRepository::class)]
+#[ORM\Table(name: 'order_product')]
 class OrderProduct
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Ignore]
     private ?int $id = null;
-
-    #[ORM\Column(length: 100)]
-    private ?string $name = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $description = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $photo = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 6, scale: 2)]
-    private ?string $price = null;
-
+    
     #[ORM\ManyToOne(inversedBy: 'orderProducts')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Order $command = null;
+    #[Ignore]
+    private ?Order $order;
+    
+    #[ORM\ManyToOne(inversedBy: 'orderProducts')]
+    #[Ignore]
+    private ?Product $product;
+    
+    #[ORM\Column(type: Types::INTEGER)]
+    #[Ignore]
+    private ?int $quantity = 1;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getOrder(): ?Order
     {
-        return $this->name;
+        return $this->order;
     }
 
-    public function setName(string $name): self
+    public function setOrder(?Order $order): self
     {
-        $this->name = $name;
+        $this->order = $order;
 
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getProduct(): ?Product
     {
-        return $this->description;
+        return $this->product;
     }
 
-    public function setDescription(?string $description): self
+    public function setProduct(?Product $product): self
     {
-        $this->description = $description;
+        $this->product = $product;
 
         return $this;
     }
 
-    public function getPhoto(): ?string
+    public function getQuantity(): ?int
     {
-        return $this->photo;
+        return $this->quantity;
     }
 
-    public function setPhoto(?string $photo): self
+    public function setQuantity(int $quantity): self
     {
-        $this->photo = $photo;
+        $this->quantity = $quantity;
 
         return $this;
     }
 
-    public function getPrice(): ?string
+    public function getProductDTO(): ProductDTO
     {
-        return $this->price;
-    }
-
-    public function setPrice(string $price): self
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
-    public function getCommand(): ?Order
-    {
-        return $this->command;
-    }
-
-    public function setCommand(?Order $command): self
-    {
-        $this->command = $command;
-
-        return $this;
+        return new ProductDTO(
+            $this->getProduct()->getId(),
+            $this->getProduct()->getName(),
+            $this->getProduct()->getDescription(),
+            $this->getProduct()->getPhoto(),
+            $this->getProduct()->getPrice(),
+            $this->getQuantity()
+        );
     }
 }
