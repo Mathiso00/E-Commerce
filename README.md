@@ -52,3 +52,5 @@ exemple:
 remote_user = xxxx
 host_key_checking = False
 vault_password_file = ./vault_pass.txt
+
+Il faut aussi modifier le fichier host afin de definir le ou les serveurs à configurer
