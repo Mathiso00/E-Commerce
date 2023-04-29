@@ -37,6 +37,3 @@
   shell: npm run generate
   args:
     chdir: /var/www/client
-# - name: restart apache
-#   become: true
-#   shell: service apache2 restart

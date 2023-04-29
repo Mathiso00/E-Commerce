@@ -33,7 +33,7 @@
     - role: ansible/roles/aptinstall
     - role: ansible/roles/phpinstall
     - role: ansible/roles/mariadbinstall
-    - role: ansible/roles/apacheinstall
+    - role: ansible/roles/nginxinstall
 
 - name: Launch App
   hosts: "*"
