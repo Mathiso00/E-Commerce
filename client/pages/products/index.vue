@@ -24,6 +24,11 @@ import {useDisplay} from "vuetify";
 import {ref} from "@vue/reactivity";
 import {IProduct} from "~/types/IProduct";
 
+definePageMeta({
+  title: 'Products',
+  auth: false
+})
+
 const { smAndUp, mdAndUp, lgAndUp } = useDisplay();
 const products = ref<Array<IProduct>>([]);
 
