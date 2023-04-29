@@ -17,8 +17,8 @@ class Order
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 7, scale: 2)]
-    private ?string $totalPrice = null;
+    #[ORM\Column(type: Types::FLOAT, precision: 7, scale: 2)]
+    private ?float $totalPrice = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $creationDate = null;
@@ -26,26 +26,26 @@ class Order
     #[ORM\ManyToOne(inversedBy: 'orders')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
-
-    #[ORM\OneToMany(mappedBy: 'command', targetEntity: OrderProduct::class, orphanRemoval: true)]
+    
+    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderProduct::class, cascade:['persist'])]
     private Collection $orderProducts;
 
     public function __construct()
     {
         $this->orderProducts = new ArrayCollection();
     }
-
+    
     public function getId(): ?int
     {
         return $this->id;
     }
-
-    public function getTotalPrice(): ?string
+    
+    public function getTotalPrice(): ?float
     {
         return $this->totalPrice;
     }
 
-    public function setTotalPrice(string $totalPrice): self
+    public function setTotalPrice(float $totalPrice): self
     {
         $this->totalPrice = $totalPrice;
 
@@ -79,29 +79,23 @@ class Order
     /**
      * @return Collection<int, OrderProduct>
      */
-    public function getOrderProducts(): Collection
+    public function getProducts(): Collection
     {
         return $this->orderProducts;
     }
 
-    public function addOrderProduct(OrderProduct $orderProduct): self
+    public function addProductList(OrderProduct $productList): self
     {
-        if (!$this->orderProducts->contains($orderProduct)) {
-            $this->orderProducts->add($orderProduct);
-            $orderProduct->setCommand($this);
+        if (!$this->orderProducts->contains($productList)) {
+            $this->orderProducts->add($productList);
         }
 
         return $this;
     }
 
-    public function removeOrderProduct(OrderProduct $orderProduct): self
+    public function removeProductList(OrderProduct $productList): self
     {
-        if ($this->orderProducts->removeElement($orderProduct)) {
-            // set the owning side to null (unless already changed)
-            if ($orderProduct->getCommand() === $this) {
-                $orderProduct->setCommand(null);
-            }
-        }
+        $this->orderProducts->removeElement($productList);
 
         return $this;
     }

@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Order;
+use App\Service\UserService;
+use App\Service\ResponseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -10,72 +12,79 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-/**
- * @Route("/api/orders", name="order_")
- */
+#[Route('/api/orders', name: "order_")]
 class OrderController extends AbstractController
 {
-    /**
-     * @Route("/", name="get_user_orders", methods={"GET"})
-     */
-    public function getUserOrders(EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+
+    private $userService;
+    private $entityManager;
+    private $responseService;
+
+    public function __construct(UserService $userService, EntityManagerInterface $entityManagerInterface, ResponseService $responseService)
     {
-        $user = $this->getUser(); // Get the current user
-        $userId = $user->getId();
-
-        // Get all orders for the current user from your database or data store
-        $orders = $entityManager->getRepository(Order::class)->findBy(['user' => $userId]);
-        if ($orders->count() === 0) {
-            return new JsonResponse(['message' => 'You have no orders.'], JsonResponse::HTTP_BAD_REQUEST);
-        }
-
-         // Define a custom handler for circular references
-        $circularReferenceHandler = function ($object) {
-            return $object->getId();
-        };
-
-        // Serialize the orders into JSON format, excluding the "user" property to avoid circular reference
-        $serializedOrders = $serializer->serialize($orders, 'json', [
-            AbstractNormalizer::IGNORED_ATTRIBUTES => ['user'],
-            'circular_reference_handler' => $circularReferenceHandler,
-        ]);
-
-        // Return the orders as a JSON response
-        return new JsonResponse([
-            'status' => 200,
-            'orders' => json_decode($serializedOrders),
-        ]);
+        $this->userService = $userService;
+        $this->entityManager = $entityManagerInterface;
+        $this->responseService = $responseService;
     }
 
-    /**
-     * @Route("/{orderId}", name="get_order", methods={"GET"})
-     */
-
-    public function getOrder(int $orderId, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+    #[Route('', name: "get_user_orders", methods: ['GET'])]
+    public function getUserOrders(SerializerInterface $serializer): JsonResponse
     {
-        // Get the order from the database
-        $order = $entityManager->getRepository(Order::class)->find($orderId);
+        try {
+            $user = $this->userService->getUserByToken();
+            $orders = $user->getOrders();
+    
+            if (sizeof($orders) === 0) {
+                return $this->responseService->returnErrorMessage('You have no orders.', JsonResponse::HTTP_NOT_FOUND);
+            }
 
-        // If the order does not exist, return a 404 response
-        if (!$order) {
-            return new JsonResponse(['status' => 404, 'message' => 'Order not found'], JsonResponse::HTTP_NOT_FOUND);
+            //  Define a custom handler for circular references
+            $circularReferenceHandler = function ($object) {
+                return $object->getId();
+            };
+    
+            // Serialize the orders into JSON format, excluding the "user" property to avoid circular reference
+            $serializedOrders = $serializer->serialize($orders, 'json', [
+                AbstractNormalizer::IGNORED_ATTRIBUTES => ['user'],
+                'circular_reference_handler' => $circularReferenceHandler
+            ]);
+    
+            // Return the orders as a JSON response
+            return new JsonResponse(json_decode($serializedOrders), JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return $this->responseService->returnErrorMessage($e->getMessage(), $e->getCode() ?: 500);
         }
+    }
 
-        // Define a custom handler for circular references
-        $circularReferenceHandler = function ($object) {
-            return $object->getId();
-        };
+    #[Route('/{orderId<\d+>}', name: "get_order", methods: ['GET'])]
+    public function getOrder(int $orderId, SerializerInterface $serializer): JsonResponse
+    {
+        try {
+            $user = $this->userService->getUserByToken();
+            $orders = $user->getOrders();
+            $orderNumber = $orderId - 1;
+    
+            if (sizeof($orders) === 0) {
+                return $this->responseService->returnErrorMessage('You have no orders.', JsonResponse::HTTP_NOT_FOUND);
+            }
+            if ($orders[$orderNumber] === null) {
+                return $this->responseService->returnErrorMessage("This order doesn't exist", JsonResponse::HTTP_NOT_FOUND);
+            }
 
-        // Serialize the orders into JSON format, excluding the "user" property to avoid circular reference
-        $serializedOrder = $serializer->serialize($order, 'json', [
-            AbstractNormalizer::IGNORED_ATTRIBUTES => ['user'],
-            'circular_reference_handler' => $circularReferenceHandler,
-        ]);
-
-        // Return the order as a JSON response
-        return new JsonResponse([
-            'status' => 200,
-            'order' => json_decode($serializedOrder),
-        ]);
+            //  Define a custom handler for circular references
+            $circularReferenceHandler = function ($object) {
+                return $object->getId();
+            };
+    
+            // Serialize the orders into JSON format, excluding the "user" property to avoid circular reference
+            $serializedOrders = $serializer->serialize($orders[$orderNumber], 'json', [
+                AbstractNormalizer::IGNORED_ATTRIBUTES => ['user'],
+                'circular_reference_handler' => $circularReferenceHandler
+            ]);
+    
+            return new JsonResponse(json_decode($serializedOrders), JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return $this->responseService->returnErrorMessage($e->getMessage(), $e->getCode() ?: 500);
+        }
     }
 }

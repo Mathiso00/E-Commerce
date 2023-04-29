@@ -1,0 +1,18 @@
+---
+# tasks file for apacheinstall
+- name: Install nginx
+  apt:
+    name:
+      - nginx
+    state: present
+
+- name: Change configuration front
+  template:
+    src: templates/default
+    dest: /etc/nginx/sites-available/default
+
+- name: Create cerbot certificate
+  shell: sudo certbot --nginx -d ultimategaminggear.tech -m mathis.onillon@epitech.eu --non-interactive --agree-tos
+
+- name: Restart nginx
+  shell: nginx -s reload
