@@ -3,7 +3,7 @@
         class="text-yellow-lighten-4 "
         style="background-color: #1d1d1b"
     >
-      <v-toolbar-title>Name</v-toolbar-title>
+      <v-toolbar-title class="text-uppercase font-weight-bold text-h4">UGG</v-toolbar-title>
       <v-spacer></v-spacer>
       <div class="d-none d-md-flex">
         <v-list style="background-color: #1d1d1b" >
