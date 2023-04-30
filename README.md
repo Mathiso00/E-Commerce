@@ -1,15 +1,40 @@
-# E-Commerce
+# ECOMMERCE WEBSITE ULTIMATE GAMING GEAR
 
-## Setup
+ULTIMATE GAMING GEAR is an e-commerce website created using Symfony, Nuxt.js and vuetify technologies.
 
-Dans le projet, 3 fichiers ne sont pas push. Ils sont présents dans l'archive envoyée.
+## SETUP
+
+To install the application, run the following commands in the terminal:
+
+In the app folder, run the command compose install
+
+In the client folder, run the command npm install
+
+
+RUN
+To start the site, run the following commands in the terminal:
+
+In the app folder, type symfony server:start
+
+In your browser, go to http://localhost:8000/api
+
+In the client folder, type npm start
+
+In your browser, go to http://localhost:3000
+
+
+DEPLOYEMENT
+
+In the project, 3 files are not pushed. They are present in the sent archive. These files are necessary for the deployment of the application.
+
+Then run this command: "ansible-playbook playbook.yml -i hosts"
 
 ### Env
 
-2 fichiers env : 
-* .env (à la racine du projet) -> /projectPath/app/.env  
+The project have 2 .env files : 
+* .env (at the root of the project) -> /projectPath/app/.env  
 
-exemple:
+example:
 APP_ENV=dev
 
 APP_SECRET=xxxxxxxxxx
@@ -22,16 +47,16 @@ JWT_PASSPHRASE=xxxxxxxxxxxxx
 
 CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
 
-DATABASE_URL="mysql://xxxxx:xxxx@127.0.0.1:3306/ecommerce" -> user que l'on retrouve dans le vault
+DATABASE_URL="mysql://xxxxx:xxxx@127.0.0.1:3306/ecommerce" -> user that can be found in the vault
 
-*  .env_client (à la racine du projet) -> /projectPath/client/.env  
+*  .env_client (at the root of the project) -> /projectPath/client/.env  
 
-exemple:
+example:
 NUXT_PUBLIC_API_BASE_URL=https://localhost:8000/api
                  
-### Clé SSH
+### SSH KEY
 
-Une clé ssh appelée EcommercekeyVPS qui est utilisée par ansible pour se connecter au VPS et ainsi installer le projet
+An ssh key called EcommercekeyVPS which is used by ansible to connect to the VPS and install the project.
 
 -----BEGIN OPENSSH PRIVATE KEY-----
 ...
@@ -40,17 +65,17 @@ Une clé ssh appelée EcommercekeyVPS qui est utilisée par ansible pour se conn
 
 ### Vault
 
-Un fichier vault_pass.txt est utilisé par ansible pour avoir le mot de passe du vault qui contient des passwords utilisés par ansible au moment de l'installation
+A vault_pass.txt file is used by ansible to have the password of the vault which contains passwords used by ansible at installation time.
 
-exemple: 
-motdepasse
+example: 
+password
 
-Il est aussi important de configurer le ansible.cfg
+It is also important to configure the ansible.cfg
 
-exemple:
+example:
 [defaults]
 remote_user = xxxx
 host_key_checking = False
 vault_password_file = ./vault_pass.txt
 
-Il faut aussi modifier le fichier host afin de definir le ou les serveurs à configurer
+You must also modify the host file to define the server(s) to configure.
